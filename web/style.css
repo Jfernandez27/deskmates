@@ -1,0 +1,99 @@
+:root { color-scheme: dark; --bg: #16171d; --fg: #e7e7ea; --muted: #9a9aa6; --card: #22232c; --line: #33343f; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 13px/1.4 ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+header { display: flex; gap: 6px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+header strong { letter-spacing: .04em; }
+/* the bar's controls, in the office's pixel style: square corners, a hard 2 px border and a pixel drop shadow,
+   at least 32 px to hit with a mouse and 44 px on touch screens */
+header > select, header > button { min-height: 32px; padding: 4px 8px; background: var(--card); color: var(--fg); font: inherit;
+  border: 2px solid var(--line); border-radius: 0; box-shadow: 2px 2px 0 #0a0a0e; cursor: pointer; }
+header > select:hover, header > button:hover { border-color: var(--muted); }
+header > select:focus-visible, header > button:focus-visible, #count .sum:focus-visible { outline: 2px solid #ffd75e; outline-offset: 2px; }
+header > button:active { box-shadow: none; transform: translate(2px, 2px); }
+header > select { max-width: 104px; }
+#theme { max-width: 128px; }
+#mute { font-size: 14px; }
+#mute[aria-pressed="true"] { opacity: .5; }
+#history-btn[aria-expanded="true"] { border-color: var(--fg); }
+@media (pointer: coarse) { header > select, header > button { min-height: 44px; } }
+#count { color: var(--muted); flex: 1 1 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#count .sum { background: none; border: 0; padding: 0; color: inherit; font: inherit; cursor: pointer; }
+#count .sum:hover { color: var(--fg); text-decoration: underline; }
+#count .sum.waiting { color: #ffd75e; }
+.conn { font-size: 12px; padding: 1px 8px; border-radius: 10px; background: #2a5a3a; }
+.conn.off { background: #5a2a2a; }
+main { padding: 16px; overflow-x: auto; }
+canvas { display: block; margin: 0 auto; touch-action: manipulation; image-rendering: pixelated; image-rendering: crisp-edges; }
+#card { position: fixed; z-index: 10; pointer-events: none; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 220px; max-width: 340px; box-shadow: 0 6px 24px #0008; }
+#card .title { font-weight: 700; margin-bottom: 4px; }
+#card .row { color: var(--muted); }
+#card .row b { color: var(--fg); font-weight: 400; }
+#card .swatch { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+header { flex-wrap: wrap; row-gap: 6px; }
+#history { position: fixed; z-index: 20; top: 0; right: 0; bottom: 0; width: min(420px, 100vw); overflow-y: auto; overscroll-behavior: contain;
+  background: var(--card); color: var(--fg); border-left: 1px solid var(--line); box-shadow: -8px 0 32px #0006; padding: 0 16px 24px; }
+#history[hidden] { display: none; }
+.history-head { position: sticky; top: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 14px 0 10px; background: var(--card); border-bottom: 1px solid var(--line); }
+.history-head h2 { margin: 0; font-size: 15px; letter-spacing: .02em; outline: none; }
+.history-close { background: none; border: 1px solid var(--line); color: var(--fg); border-radius: 6px; min-width: 32px; min-height: 32px; cursor: pointer; font: inherit; }
+#history h3 { margin: 18px 0 8px; font-size: 12px; font-weight: 400; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; display: flex; justify-content: space-between; }
+.h-date { margin: 10px 0 0; color: var(--muted); }
+.h-totals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0 0; }
+.h-totals div { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; }
+.h-totals dt { color: var(--muted); font-size: 11px; }
+.h-totals dd { margin: 2px 0 0; font-size: 18px; font-weight: 700; white-space: nowrap; }
+.h-hours { display: flex; align-items: flex-end; gap: 2px; height: 56px; padding: 4px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px 8px 0 0; }
+.h-bar { flex: 1; background: var(--fg); opacity: .85; border-radius: 2px 2px 0 0; min-width: 0; }
+.h-bar.zero { background: var(--line); opacity: 1; }
+.h-ticks { position: relative; height: 16px; margin: 0 4px; font-size: 10px; color: var(--muted); }
+.h-ticks span { position: absolute; top: 2px; }
+.h-list { list-style: none; margin: 0; padding: 0; }
+.h-row { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.h-row.sub { padding-left: 14px; }
+.h-top { display: flex; justify-content: space-between; gap: 8px; }
+.h-name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.h-span { color: var(--muted); white-space: nowrap; }
+.h-track { position: relative; height: 10px; margin: 6px 0; background: var(--bg); border-radius: 3px; }
+.h-seg { position: absolute; top: 0; bottom: 0; background: var(--line); border-radius: 3px; overflow: hidden; min-width: 3px; }
+.h-work { display: block; height: 100%; background: var(--fg); opacity: .8; }
+.h-stats { display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--muted); font-size: 12px; }
+.h-stats b { color: var(--fg); font-weight: 400; }
+.h-empty { color: var(--muted); padding: 16px 0; list-style: none; }
+.h-legend { margin: 12px 0 0; color: var(--muted); font-size: 11px; }
+.h-key { display: inline-block; width: 12px; height: 8px; border-radius: 2px; vertical-align: middle; margin-left: 6px; }
+.h-key.work { background: var(--fg); opacity: .8; margin-left: 0; }
+.h-key.seen { background: var(--line); }
+.h-range { text-transform: none; letter-spacing: 0; }
+@media (max-width: 480px) { header { padding: 8px 12px; gap: 10px; } #history { padding: 0 12px 24px; border-left: 0; } }
+/* below a small tablet the office is not readable: say so instead of drawing it tiny. The header and history still work. */
+#too-small { display: none; margin: 32px 16px; color: var(--muted); text-align: center; }
+@media (max-width: 599px), (max-height: 399px) {
+  main { display: none; }
+  #too-small { display: block; }
+}
+/* read by screen readers, not drawn: the canvas has no text of its own */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+/* ?kiosk: the office alone, filling the window */
+body.kiosk header { display: none; }
+/* a tap on the office lays the bar over it for a few seconds, so the office keeps its size */
+body.kiosk.peek header { display: flex; position: fixed; top: 0; left: 0; right: 0; z-index: 15; background: var(--bg); }
+@media (prefers-reduced-motion: no-preference) {
+  body.kiosk.peek header { animation: bar-in 120ms ease-out; }
+  @keyframes bar-in { from { transform: translateY(-100%); } }
+}
+#kiosk-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; padding: 4px; }
+@media (pointer: coarse) { #kiosk-btn { min-width: 44px; } }
+body.kiosk main { padding: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+/* kiosk stretches the canvas past its own pixels to fill the screen: nearest neighbour, so the art stays blocky */
+body.kiosk canvas { image-rendering: pixelated; }
+#share-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; padding: 4px; }
+@media (pointer: coarse) { #share-btn { min-width: 44px; } }
+#share { background: var(--card); color: var(--fg); border: 2px solid var(--line); border-radius: 0; box-shadow: 4px 4px 0 #0a0a0e;
+  padding: 16px; max-width: min(440px, 100vw - 32px); }
+#share::backdrop { background: #0008; }
+.share-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.share-head h2 { margin: 0; font-size: 15px; letter-spacing: .02em; outline: none; }
+.share-close { background: none; border: 2px solid var(--line); color: var(--fg); border-radius: 0; min-width: 32px; min-height: 32px; cursor: pointer; font: inherit; }
+.share-body p { margin: 8px 0; }
+.share-link { display: block; word-break: break-all; margin: 10px 0; user-select: all; }
+.share-body canvas { display: block; margin: 8px auto; }

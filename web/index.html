@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>deskmates</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header>
+    <strong>deskmates</strong>
+    <span id="conn" class="conn off">connecting…</span>
+    <span id="count"></span>
+    <select id="theme" aria-label="Theme"></select>
+    <select id="chars" aria-label="Characters"></select>
+    <select id="pets" aria-label="Pets"></select>
+    <select id="season" aria-label="Seasonal decor"></select>
+    <button id="history-btn" type="button" aria-expanded="false" aria-controls="history">History</button>
+    <button id="share-btn" type="button" aria-haspopup="dialog" aria-controls="share" aria-label="Open on another device"></button>
+    <button id="mute" type="button" aria-pressed="false" aria-label="Sound and notifications" title="Sound and notifications">🔔</button>
+    <button id="kiosk-btn" type="button" aria-pressed="false" aria-label="Kiosk: the office alone, full screen"></button>
+  </header>
+  <main><canvas id="office" aria-label="Office with your agents"></canvas></main>
+  <ul id="roster" class="sr-only" aria-label="Agents in the office"></ul>
+  <p id="announce" class="sr-only" aria-live="polite"></p>
+  <p id="too-small">The office needs a window at least 600 px wide and 400 px tall: a tablet, laptop or desktop. Make the window larger, or turn the tablet.</p>
+  <div id="card" role="tooltip" hidden></div>
+  <aside id="history" aria-labelledby="history-title" hidden>
+    <div class="history-head">
+      <h2 id="history-title" tabindex="-1">Today's history</h2>
+      <button class="history-close" type="button" aria-label="Close history">✕</button>
+    </div>
+    <div class="history-body"></div>
+  </aside>
+  <dialog id="share" aria-labelledby="share-title">
+    <div class="share-head"><h2 id="share-title" tabindex="-1">Open on another device</h2><button class="share-close" type="button" aria-label="Close">✕</button></div>
+    <div class="share-body"></div>
+  </dialog>
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "id": "day",
+  "label": "Day",
+  "floor": "pixel-agents/floors/floor_1.png",
+  "floorTint": null,
+  "wallTint": null,
+  "page": { "bg": "#16171d", "fg": "#e7e7ea", "muted": "#9a9aa6", "card": "#22232c", "line": "#33343f" },
+  "night": null
+}

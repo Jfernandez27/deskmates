@@ -1,0 +1,68 @@
+{
+  "name": "deskmates",
+  "version": "0.1.0",
+  "description": "A pixel-art office where your AI coding agents work at their desks.",
+  "license": "MIT",
+  "author": "Jesús Fernández (id3a)",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "bin": {
+    "deskmates": "dist/cli/deskmates.js"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "build": "npm run build:web && npm run build:cli",
+    "build:web": "vite build",
+    "build:cli": "vite build -c vite.cli.config.ts",
+    "e2e": "playwright test",
+    "typecheck": "tsc --noEmit",
+    "start": "vite build && node bin/deskmates.ts serve",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "smol-toml": "^1.9.1",
+    "ws": "^8.21.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^22.20.3",
+    "@types/ws": "^8.18.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
+  },
+  "files": [
+    "bin/deskmates-hook.sh",
+    "dist/",
+    "assets/",
+    "roles.toml",
+    "README.md",
+    "ASSETS.md",
+    "LICENSE",
+    "docs/ingest-api.md",
+    "docs/mcp.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jfernandez27/deskmates.git"
+  },
+  "homepage": "https://github.com/Jfernandez27/deskmates#readme",
+  "bugs": {
+    "url": "https://github.com/Jfernandez27/deskmates/issues"
+  },
+  "keywords": [
+    "claude-code",
+    "ai-agents",
+    "pixel-art",
+    "codex",
+    "copilot",
+    "cursor",
+    "gemini-cli",
+    "visualization"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

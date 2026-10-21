@@ -1,0 +1,6 @@
+{"sessionId":"7f3c2a9e-0000-4000-8000-000000000001","projectHash":"abc123","startTime":"2026-10-14T03:15:02.120Z","lastUpdated":"2026-10-14T03:15:02.120Z","kind":"main"}
+{"id":"m1","timestamp":"2026-10-14T03:15:05.000Z","type":"user","content":[{"text":"<scrubbed>"}]}
+{"id":"m2","timestamp":"2026-10-14T03:15:07.000Z","type":"gemini","content":"<scrubbed>","toolCalls":[{"id":"c1","name":"read_file","args":{"absolute_path":"/home/user/myproj/src/app.ts"},"status":"executing","timestamp":"2026-10-14T03:15:07.000Z"}],"tokens":{"input":1200,"output":40,"cached":200,"thoughts":10,"tool":0,"total":1250},"model":"gemini-2.5-pro"}
+{"id":"m2","timestamp":"2026-10-14T03:15:08.000Z","type":"gemini","content":"<scrubbed>","toolCalls":[{"id":"c1","name":"read_file","args":{"absolute_path":"/home/user/myproj/src/app.ts"},"status":"success","timestamp":"2026-10-14T03:15:07.000Z"},{"id":"c2","name":"run_shell_command","args":{"command":"npm test"},"status":"executing","timestamp":"2026-10-14T03:15:08.000Z"}],"tokens":{"input":1500,"output":60,"cached":200,"thoughts":10,"tool":0,"total":1570},"model":"gemini-2.5-pro"}
+{"$set":{"lastUpdated":"2026-10-14T03:15:09.000Z"}}
+{"id":"m3","timestamp":"2026-10-14T03:15:12.000Z","type":"gemini","content":"<scrubbed>","tokens":{"input":1800,"output":90,"cached":1500,"thoughts":0,"tool":0,"total":1890},"model":"gemini-2.5-pro"}

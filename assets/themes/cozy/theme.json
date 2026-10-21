@@ -1,0 +1,183 @@
+{
+  "id": "cozy",
+  "label": "Cozy",
+  "floor": "pixel-agents/floors/floor_6.png",
+  "floorTint": "#c08a52",
+  "wallTint": "#f2dfc2",
+  "page": {
+    "bg": "#1d1714",
+    "fg": "#f1e6d8",
+    "muted": "#a8968a",
+    "card": "#2a211c",
+    "line": "#3d3029"
+  },
+  "night": null,
+  "rugs": [
+    {
+      "c": 2,
+      "r": 3,
+      "w": 7,
+      "h": 4,
+      "color": "#9a4434",
+      "border": "#5e2620"
+    },
+    {
+      "c": 10,
+      "r": 3,
+      "w": 7,
+      "h": 4,
+      "color": "#4f6b3a",
+      "border": "#2f4224"
+    },
+    {
+      "c": 2,
+      "r": 8,
+      "w": 7,
+      "h": 4,
+      "color": "#4f6b3a",
+      "border": "#2f4224"
+    },
+    {
+      "c": 10,
+      "r": 8,
+      "w": 7,
+      "h": 4,
+      "color": "#9a4434",
+      "border": "#5e2620"
+    },
+    {
+      "c": 18,
+      "r": 2,
+      "w": 5,
+      "h": 3,
+      "color": "#b8863b",
+      "border": "#7a5622"
+    }
+  ],
+  "decor": [
+    {
+      "src": "pixel-agents/furniture/LARGE_PAINTING/LARGE_PAINTING.png",
+      "c": 19,
+      "r": 1,
+      "blocks": false
+    },
+    {
+      "src": "pixel-agents/furniture/SMALL_PAINTING/SMALL_PAINTING.png",
+      "c": 6,
+      "r": 1,
+      "blocks": false
+    },
+    {
+      "src": "pixel-agents/furniture/SMALL_PAINTING_2/SMALL_PAINTING_2.png",
+      "c": 11,
+      "r": 1,
+      "blocks": false
+    },
+    {
+      "src": "pixel-agents/furniture/HANGING_PLANT/HANGING_PLANT.png",
+      "c": 12,
+      "r": 1,
+      "blocks": false
+    },
+    {
+      "src": "pixel-agents/furniture/HANGING_PLANT/HANGING_PLANT.png",
+      "c": 17,
+      "r": 1,
+      "blocks": false
+    },
+    {
+      "src": "pixel-agents/furniture/HANGING_PLANT/HANGING_PLANT.png",
+      "c": 22,
+      "r": 1,
+      "blocks": false
+    },
+    {
+      "src": "pixel-agents/furniture/SOFA/SOFA_FRONT.png",
+      "c": 19,
+      "r": 2,
+      "w": 2,
+      "blocks": false,
+      "spots": [
+        {
+          "c": 19,
+          "r": 2,
+          "face": "down",
+          "act": "sofa"
+        },
+        {
+          "c": 20,
+          "r": 2,
+          "face": "down",
+          "act": "sofa"
+        }
+      ]
+    },
+    {
+      "src": "pixel-agents/furniture/COFFEE_TABLE/COFFEE_TABLE.png",
+      "c": 19,
+      "r": 4,
+      "w": 2,
+      "blocks": true
+    },
+    {
+      "src": "themes/cozy/FLOOR_LAMP.png",
+      "c": 18,
+      "r": 2,
+      "blocks": true
+    },
+    {
+      "src": "themes/cozy/FLOOR_LAMP.png",
+      "c": 21,
+      "r": 2,
+      "blocks": true
+    }
+  ],
+  "glows": [
+    {
+      "c": 18,
+      "r": 1,
+      "color": "#ffc070",
+      "radius": 34,
+      "alpha": 0.22
+    },
+    {
+      "c": 21,
+      "r": 1,
+      "color": "#ffc070",
+      "radius": 34,
+      "alpha": 0.22
+    },
+    {
+      "c": 5,
+      "r": 5,
+      "color": "#ffb060",
+      "radius": 40,
+      "alpha": 0.12
+    },
+    {
+      "c": 13,
+      "r": 5,
+      "color": "#ffb060",
+      "radius": 40,
+      "alpha": 0.12
+    },
+    {
+      "c": 5,
+      "r": 10,
+      "color": "#ffb060",
+      "radius": 40,
+      "alpha": 0.12
+    },
+    {
+      "c": 13,
+      "r": 10,
+      "color": "#ffb060",
+      "radius": 40,
+      "alpha": 0.12
+    }
+  ],
+  "removeDecor": [
+    "breakroom/TV_1.png",
+    "pixel-agents/furniture/SOFA/SOFA_BACK.png"
+  ]
+}

@@ -1,0 +1,9 @@
+dist/
+node_modules/
+playwright-report/
+test-results/
+.claude/
+.superpowers/
+# private notes, linked from the deskmates-notes repo
+docs/superpowers
+CLAUDE.local.md

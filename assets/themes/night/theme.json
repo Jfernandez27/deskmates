@@ -1,0 +1,9 @@
+{
+  "id": "night",
+  "label": "Night shift",
+  "floor": "pixel-agents/floors/floor_3.png",
+  "floorTint": "#8a96b8",
+  "wallTint": "#7a84a6",
+  "page": { "bg": "#0b0d16", "fg": "#d8dcf0", "muted": "#7d84a3", "card": "#151a2b", "line": "#262c45" },
+  "night": { "darkness": 0.62, "screenGlow": "#7fc4ff", "machineGlow": "#ffd2a0" }
+}

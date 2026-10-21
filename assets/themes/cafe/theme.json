@@ -1,0 +1,183 @@
+{
+  "id": "cafe",
+  "label": "Café / cowork",
+  "floor": "pixel-agents/floors/floor_1.png",
+  "floorTint": "#e0a27c",
+  "wallTint": "#f3e4cc",
+  "page": {
+    "bg": "#1a1512",
+    "fg": "#f2e8dc",
+    "muted": "#a99a8c",
+    "card": "#28201b",
+    "line": "#3b2f27"
+  },
+  "night": null,
+  "desk": "themes/cafe/CAFE_TABLE.png",
+  "chair": "pixel-agents/furniture/CUSHIONED_CHAIR/CUSHIONED_CHAIR_FRONT.png",
+  "computer": "laptop",
+  "removeDecor": [
+    "breakroom/SODA.png",
+    "breakroom/SNACKS.png",
+    "pixel-agents/furniture/WHITEBOARD/WHITEBOARD.png",
+    "breakroom/TV_1.png",
+    "pixel-agents/furniture/SOFA/SOFA_BACK.png",
+    "themes/cafe/ESPRESSO.png"
+  ],
+  "decor": [
+    {
+      "src": "themes/cafe/ESPRESSO.png",
+      "c": 1,
+      "r": 2,
+      "role": "machine",
+      "blocks": true,
+      "spots": [
+        {
+          "c": 1,
+          "r": 3,
+          "face": "down",
+          "act": "coffee"
+        },
+        {
+          "c": 1,
+          "r": 4,
+          "face": "up",
+          "act": "drink"
+        },
+        {
+          "c": 1,
+          "r": 5,
+          "face": "up",
+          "act": "drink"
+        }
+      ]
+    },
+    {
+      "src": "themes/cafe/PASTRY_COUNTER.png",
+      "c": 2,
+      "r": 2,
+      "role": "machine",
+      "blocks": true,
+      "spots": [
+        {
+          "c": 2,
+          "r": 3,
+          "face": "up",
+          "act": "drink"
+        }
+      ]
+    },
+    {
+      "src": "themes/cafe/MENU_BOARD.png",
+      "c": 8,
+      "r": 1,
+      "blocks": false
+    },
+    {
+      "src": "pixel-agents/furniture/HANGING_PLANT/HANGING_PLANT.png",
+      "c": 6,
+      "r": 1,
+      "blocks": false
+    },
+    {
+      "src": "pixel-agents/furniture/HANGING_PLANT/HANGING_PLANT.png",
+      "c": 17,
+      "r": 1,
+      "blocks": false
+    },
+    {
+      "src": "pixel-agents/furniture/SMALL_PAINTING/SMALL_PAINTING.png",
+      "c": 11,
+      "r": 1,
+      "blocks": false
+    },
+    {
+      "src": "pixel-agents/furniture/SMALL_TABLE/SMALL_TABLE_FRONT.png",
+      "c": 18,
+      "r": 3,
+      "w": 2,
+      "blocks": true,
+      "spots": [
+        {
+          "c": 18,
+          "r": 4,
+          "face": "up",
+          "act": "drink"
+        },
+        {
+          "c": 19,
+          "r": 4,
+          "face": "up",
+          "act": "drink"
+        }
+      ]
+    },
+    {
+      "src": "pixel-agents/furniture/COFFEE/COFFEE.png",
+      "c": 18,
+      "r": 3,
+      "blocks": true
+    },
+    {
+      "src": "pixel-agents/furniture/SMALL_TABLE/SMALL_TABLE_FRONT.png",
+      "c": 20,
+      "r": 3,
+      "w": 2,
+      "blocks": true,
+      "spots": [
+        {
+          "c": 20,
+          "r": 4,
+          "face": "up",
+          "act": "drink"
+        },
+        {
+          "c": 21,
+          "r": 4,
+          "face": "up",
+          "act": "drink"
+        }
+      ]
+    },
+    {
+      "src": "pixel-agents/furniture/COFFEE/COFFEE.png",
+      "c": 21,
+      "r": 3,
+      "blocks": true
+    },
+    {
+      "src": "pixel-agents/furniture/COFFEE/COFFEE.png",
+      "c": 19,
+      "r": 8,
+      "blocks": true
+    },
+    {
+      "src": "pixel-agents/furniture/COFFEE/COFFEE.png",
+      "c": 21,
+      "r": 8,
+      "blocks": true
+    }
+  ],
+  "glows": [
+    {
+      "c": 19,
+      "r": 2,
+      "color": "#ffcf80",
+      "radius": 30,
+      "alpha": 0.2
+    },
+    {
+      "c": 21,
+      "r": 2,
+      "color": "#ffcf80",
+      "radius": 30,
+      "alpha": 0.2
+    },
+    {
+      "c": 2,
+      "r": 1,
+      "color": "#ffcf80",
+      "radius": 28,
+      "alpha": 0.18
+    }
+  ]
+}

@@ -1,0 +1,213 @@
+{
+  "id": "servers",
+  "label": "Server room",
+  "floor": "pixel-agents/floors/floor_4.png",
+  "floorTint": "#a9bcd8",
+  "wallTint": "#a6b4cc",
+  "page": {
+    "bg": "#0c1119",
+    "fg": "#d6e2f2",
+    "muted": "#7d8ba3",
+    "card": "#141c29",
+    "line": "#24304a"
+  },
+  "night": null,
+  "computer": "pc",
+  "decor": [
+    {
+      "src": "themes/servers/RACK_A_1.png",
+      "c": 18,
+      "r": 2,
+      "frames": [
+        "themes/servers/RACK_A_1.png",
+        "themes/servers/RACK_A_2.png"
+      ],
+      "blocks": true
+    },
+    {
+      "src": "themes/servers/RACK_B_1.png",
+      "c": 19,
+      "r": 2,
+      "frames": [
+        "themes/servers/RACK_B_1.png",
+        "themes/servers/RACK_B_2.png"
+      ],
+      "blocks": true
+    },
+    {
+      "src": "themes/servers/RACK_A_1.png",
+      "c": 20,
+      "r": 2,
+      "frames": [
+        "themes/servers/RACK_A_1.png",
+        "themes/servers/RACK_A_2.png"
+      ],
+      "blocks": true
+    },
+    {
+      "src": "themes/servers/RACK_B_1.png",
+      "c": 21,
+      "r": 2,
+      "frames": [
+        "themes/servers/RACK_B_1.png",
+        "themes/servers/RACK_B_2.png"
+      ],
+      "blocks": true
+    },
+    {
+      "src": "themes/servers/RACK_A_1.png",
+      "c": 22,
+      "r": 2,
+      "frames": [
+        "themes/servers/RACK_A_1.png",
+        "themes/servers/RACK_A_2.png"
+      ],
+      "blocks": true
+    },
+    {
+      "src": "themes/servers/RACK_A_1.png",
+      "c": 12,
+      "r": 2,
+      "frames": [
+        "themes/servers/RACK_A_1.png",
+        "themes/servers/RACK_A_2.png"
+      ],
+      "blocks": true
+    },
+    {
+      "src": "themes/servers/RACK_B_1.png",
+      "c": 13,
+      "r": 2,
+      "frames": [
+        "themes/servers/RACK_B_1.png",
+        "themes/servers/RACK_B_2.png"
+      ],
+      "blocks": true
+    },
+    {
+      "src": "themes/servers/RACK_B_1.png",
+      "c": 22,
+      "r": 9,
+      "frames": [
+        "themes/servers/RACK_B_1.png",
+        "themes/servers/RACK_B_2.png"
+      ],
+      "blocks": true
+    },
+    {
+      "src": "themes/servers/RACK_A_1.png",
+      "c": 22,
+      "r": 10,
+      "frames": [
+        "themes/servers/RACK_A_1.png",
+        "themes/servers/RACK_A_2.png"
+      ],
+      "blocks": true
+    },
+    {
+      "src": "themes/servers/RACK_B_1.png",
+      "c": 22,
+      "r": 11,
+      "frames": [
+        "themes/servers/RACK_B_1.png",
+        "themes/servers/RACK_B_2.png"
+      ],
+      "blocks": true
+    },
+    {
+      "src": "themes/servers/RACK_A_1.png",
+      "c": 21,
+      "r": 11,
+      "frames": [
+        "themes/servers/RACK_A_1.png",
+        "themes/servers/RACK_A_2.png"
+      ],
+      "blocks": true
+    }
+  ],
+  "glows": [
+    {
+      "c": 18,
+      "r": 1,
+      "color": "#4aa8ff",
+      "radius": 26,
+      "alpha": 0.22
+    },
+    {
+      "c": 19,
+      "r": 1,
+      "color": "#4aa8ff",
+      "radius": 26,
+      "alpha": 0.22
+    },
+    {
+      "c": 20,
+      "r": 1,
+      "color": "#4aa8ff",
+      "radius": 26,
+      "alpha": 0.22
+    },
+    {
+      "c": 21,
+      "r": 1,
+      "color": "#4aa8ff",
+      "radius": 26,
+      "alpha": 0.22
+    },
+    {
+      "c": 22,
+      "r": 1,
+      "color": "#4aa8ff",
+      "radius": 26,
+      "alpha": 0.22
+    },
+    {
+      "c": 12,
+      "r": 1,
+      "color": "#4aa8ff",
+      "radius": 26,
+      "alpha": 0.22
+    },
+    {
+      "c": 13,
+      "r": 1,
+      "color": "#4aa8ff",
+      "radius": 26,
+      "alpha": 0.22
+    },
+    {
+      "c": 22,
+      "r": 8,
+      "color": "#4aa8ff",
+      "radius": 26,
+      "alpha": 0.22
+    },
+    {
+      "c": 22,
+      "r": 9,
+      "color": "#4aa8ff",
+      "radius": 26,
+      "alpha": 0.22
+    },
+    {
+      "c": 22,
+      "r": 10,
+      "color": "#4aa8ff",
+      "radius": 26,
+      "alpha": 0.22
+    },
+    {
+      "c": 21,
+      "r": 10,
+      "color": "#4aa8ff",
+      "radius": 26,
+      "alpha": 0.22
+    }
+  ],
+  "removeDecor": [
+    "pixel-agents/furniture/LARGE_PLANT/LARGE_PLANT.png",
+    "pixel-agents/furniture/PLANT/PLANT.png",
+    "breakroom/TV_1.png",
+    "pixel-agents/furniture/SOFA/SOFA_BACK.png"
+  ]
+}

@@ -1,0 +1,2 @@
+{"role": "user", "message": {"content": [{"type": "text", "text": "<scrubbed>"}]}}
+{"role": "assistant", "message": {"content": [{"type": "text", "text": "<scrubbed>"}, {"type": "tool_use", "name": "GetDynamicTools", "input": {"namespace": "cursor-app-control"}}, {"type": "tool_use", "name": "Glob", "input": {"glob_pattern": "**/*.ts"}}, {"type": "tool_use", "name": "Shell", "input": {"command": "npm test", "description": "<scrubbed>"}}]}}

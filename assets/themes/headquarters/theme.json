@@ -1,0 +1,595 @@
+{
+  "id": "headquarters",
+  "label": "Headquarters",
+  "floor": "pixel-agents/floors/floor_2.png",
+  "floorTint": "#d2b48f",
+  "wallTint": "#73767f",
+  "page": {
+    "bg": "#17171a",
+    "fg": "#ebe7e2",
+    "muted": "#9d988f",
+    "card": "#232326",
+    "line": "#35353a"
+  },
+  "night": null,
+  "layout": {
+    "cols": 48,
+    "rows": 28,
+    "islandSize": 4,
+    "seats": [
+      {
+        "c": 4,
+        "r": 6
+      },
+      {
+        "c": 7,
+        "r": 6
+      },
+      {
+        "c": 10,
+        "r": 6
+      },
+      {
+        "c": 13,
+        "r": 6
+      },
+      {
+        "c": 19,
+        "r": 6
+      },
+      {
+        "c": 22,
+        "r": 6
+      },
+      {
+        "c": 25,
+        "r": 6
+      },
+      {
+        "c": 28,
+        "r": 6
+      },
+      {
+        "c": 34,
+        "r": 6
+      },
+      {
+        "c": 37,
+        "r": 6
+      },
+      {
+        "c": 40,
+        "r": 6
+      },
+      {
+        "c": 43,
+        "r": 6
+      },
+      {
+        "c": 4,
+        "r": 19
+      },
+      {
+        "c": 7,
+        "r": 19
+      },
+      {
+        "c": 10,
+        "r": 19
+      },
+      {
+        "c": 13,
+        "r": 19
+      },
+      {
+        "c": 19,
+        "r": 19
+      },
+      {
+        "c": 22,
+        "r": 19
+      },
+      {
+        "c": 25,
+        "r": 19
+      },
+      {
+        "c": 28,
+        "r": 19
+      },
+      {
+        "c": 34,
+        "r": 19
+      },
+      {
+        "c": 37,
+        "r": 19
+      },
+      {
+        "c": 40,
+        "r": 19
+      },
+      {
+        "c": 43,
+        "r": 19
+      }
+    ],
+    "door": {
+      "c": 23,
+      "r": 27
+    },
+    "doorGap": [
+      23,
+      24
+    ],
+    "meeting": [
+      {
+        "c": 39,
+        "r": 12,
+        "face": "right"
+      },
+      {
+        "c": 43,
+        "r": 12,
+        "face": "left"
+      },
+      {
+        "c": 41,
+        "r": 15,
+        "face": "up"
+      },
+      {
+        "c": 39,
+        "r": 13,
+        "face": "right"
+      },
+      {
+        "c": 43,
+        "r": 13,
+        "face": "left"
+      },
+      {
+        "c": 40,
+        "r": 15,
+        "face": "up"
+      },
+      {
+        "c": 42,
+        "r": 15,
+        "face": "up"
+      }
+    ]
+  },
+  "decor": [
+    {
+      "src": "breakroom/SODA.png",
+      "c": 21,
+      "r": 2,
+      "blocks": true,
+      "role": "machine",
+      "spots": [
+        {
+          "c": 21,
+          "r": 3,
+          "face": "up",
+          "act": "drink"
+        },
+        {
+          "c": 21,
+          "r": 4,
+          "face": "up",
+          "act": "drink"
+        }
+      ]
+    },
+    {
+      "src": "themes/cafe/ESPRESSO.png",
+      "c": 22,
+      "r": 2,
+      "blocks": true,
+      "role": "machine",
+      "spots": [
+        {
+          "c": 22,
+          "r": 3,
+          "face": "down",
+          "act": "coffee"
+        }
+      ]
+    },
+    {
+      "src": "pixel-agents/furniture/SMALL_TABLE/SMALL_TABLE_FRONT.png",
+      "c": 23,
+      "r": 2,
+      "w": 2,
+      "blocks": true,
+      "spots": [
+        {
+          "c": 23,
+          "r": 3,
+          "face": "up",
+          "act": "drink"
+        },
+        {
+          "c": 24,
+          "r": 3,
+          "face": "up",
+          "act": "drink"
+        }
+      ]
+    },
+    {
+      "src": "pixel-agents/furniture/COFFEE/COFFEE.png",
+      "c": 23,
+      "r": 2,
+      "blocks": true
+    },
+    {
+      "src": "breakroom/SNACKS.png",
+      "c": 25,
+      "r": 2,
+      "blocks": true,
+      "role": "machine",
+      "spots": [
+        {
+          "c": 25,
+          "r": 3,
+          "face": "up",
+          "act": "drink"
+        }
+      ]
+    },
+    {
+      "src": "breakroom/SODA.png",
+      "c": 26,
+      "r": 2,
+      "blocks": true,
+      "role": "machine",
+      "spots": [
+        {
+          "c": 26,
+          "r": 3,
+          "face": "up",
+          "act": "drink"
+        },
+        {
+          "c": 26,
+          "r": 4,
+          "face": "up",
+          "act": "drink"
+        }
+      ]
+    },
+    {
+      "src": "themes/cafe/MENU_BOARD.png",
+      "c": 23,
+      "r": 1,
+      "w": 2,
+      "blocks": false
+    },
+    {
+      "src": "pixel-agents/furniture/HANGING_PLANT/HANGING_PLANT.png",
+      "c": 19,
+      "r": 1,
+      "blocks": false
+    },
+    {
+      "src": "pixel-agents/furniture/HANGING_PLANT/HANGING_PLANT.png",
+      "c": 28,
+      "r": 1,
+      "blocks": false
+    },
+    {
+      "src": "pixel-agents/furniture/BOOKSHELF/BOOKSHELF.png",
+      "c": 4,
+      "r": 1,
+      "w": 2,
+      "blocks": false
+    },
+    {
+      "src": "pixel-agents/furniture/WHITEBOARD/WHITEBOARD.png",
+      "c": 9,
+      "r": 1,
+      "w": 2,
+      "blocks": false
+    },
+    {
+      "src": "pixel-agents/furniture/SMALL_PAINTING/SMALL_PAINTING.png",
+      "c": 13,
+      "r": 1,
+      "blocks": false
+    },
+    {
+      "src": "pixel-agents/furniture/LARGE_PAINTING/LARGE_PAINTING.png",
+      "c": 35,
+      "r": 1,
+      "w": 2,
+      "blocks": false
+    },
+    {
+      "src": "pixel-agents/furniture/CLOCK/CLOCK.png",
+      "c": 39,
+      "r": 1,
+      "blocks": false,
+      "role": "clock"
+    },
+    {
+      "src": "pixel-agents/furniture/BOOKSHELF/BOOKSHELF.png",
+      "c": 42,
+      "r": 1,
+      "w": 2,
+      "blocks": false
+    },
+    {
+      "src": "breakroom/TV_1.png",
+      "c": 23,
+      "r": 11,
+      "w": 2,
+      "blocks": true,
+      "role": "screen",
+      "frames": [
+        "breakroom/TV_1.png",
+        "breakroom/TV_2.png",
+        "breakroom/TV_3.png"
+      ]
+    },
+    {
+      "src": "pixel-agents/furniture/COFFEE_TABLE/COFFEE_TABLE.png",
+      "c": 23,
+      "r": 13,
+      "w": 2,
+      "h": 1,
+      "blocks": true
+    },
+    {
+      "src": "pixel-agents/furniture/SOFA/SOFA_BACK.png",
+      "c": 22,
+      "r": 14,
+      "w": 2,
+      "blocks": false,
+      "spots": [
+        {
+          "c": 22,
+          "r": 14,
+          "face": "up",
+          "act": "sofa"
+        },
+        {
+          "c": 23,
+          "r": 14,
+          "face": "up",
+          "act": "game"
+        }
+      ]
+    },
+    {
+      "src": "pixel-agents/furniture/SOFA/SOFA_BACK.png",
+      "c": 24,
+      "r": 14,
+      "w": 2,
+      "blocks": false,
+      "spots": [
+        {
+          "c": 24,
+          "r": 14,
+          "face": "up",
+          "act": "game"
+        },
+        {
+          "c": 25,
+          "r": 14,
+          "face": "up",
+          "act": "sofa"
+        }
+      ]
+    },
+    {
+      "src": "pixel-agents/furniture/LARGE_PLANT/LARGE_PLANT.png",
+      "c": 20,
+      "r": 12,
+      "w": 2,
+      "blocks": true
+    },
+    {
+      "src": "pixel-agents/furniture/LARGE_PLANT/LARGE_PLANT.png",
+      "c": 26,
+      "r": 12,
+      "w": 2,
+      "blocks": true
+    },
+    {
+      "src": "pixel-agents/furniture/PLANT/PLANT.png",
+      "c": 21,
+      "r": 14,
+      "blocks": true
+    },
+    {
+      "src": "pixel-agents/furniture/TABLE_FRONT/TABLE_FRONT.png",
+      "c": 40,
+      "r": 14,
+      "w": 3,
+      "h": 4,
+      "blocks": true,
+      "role": "meeting"
+    },
+    {
+      "src": "pixel-agents/furniture/LARGE_PLANT/LARGE_PLANT.png",
+      "c": 44,
+      "r": 16,
+      "w": 2,
+      "blocks": true
+    },
+    {
+      "src": "themes/library/TALL_BOOKSHELF.png",
+      "c": 5,
+      "r": 12,
+      "w": 2,
+      "blocks": true
+    },
+    {
+      "src": "pixel-agents/furniture/DOUBLE_BOOKSHELF/DOUBLE_BOOKSHELF.png",
+      "c": 7,
+      "r": 12,
+      "w": 2,
+      "blocks": true
+    },
+    {
+      "src": "themes/library/TALL_BOOKSHELF_2.png",
+      "c": 9,
+      "r": 12,
+      "w": 2,
+      "blocks": true
+    },
+    {
+      "src": "pixel-agents/furniture/CUSHIONED_BENCH/CUSHIONED_BENCH.png",
+      "c": 6,
+      "r": 15,
+      "blocks": true
+    },
+    {
+      "src": "pixel-agents/furniture/SMALL_TABLE/SMALL_TABLE_FRONT.png",
+      "c": 7,
+      "r": 15,
+      "w": 2,
+      "blocks": true
+    },
+    {
+      "src": "pixel-agents/furniture/CUSHIONED_BENCH/CUSHIONED_BENCH.png",
+      "c": 9,
+      "r": 15,
+      "blocks": true
+    },
+    {
+      "src": "pixel-agents/furniture/LARGE_PLANT/LARGE_PLANT.png",
+      "c": 12,
+      "r": 13,
+      "w": 2,
+      "blocks": true
+    },
+    {
+      "src": "pixel-agents/furniture/PLANT/PLANT.png",
+      "c": 4,
+      "r": 12,
+      "blocks": true
+    },
+    {
+      "src": "pixel-agents/furniture/PLANT/PLANT.png",
+      "c": 1,
+      "r": 2,
+      "blocks": true
+    },
+    {
+      "src": "pixel-agents/furniture/PLANT/PLANT.png",
+      "c": 46,
+      "r": 2,
+      "blocks": true
+    },
+    {
+      "src": "pixel-agents/furniture/LARGE_PLANT/LARGE_PLANT.png",
+      "c": 1,
+      "r": 25,
+      "w": 2,
+      "blocks": true
+    },
+    {
+      "src": "pixel-agents/furniture/LARGE_PLANT/LARGE_PLANT.png",
+      "c": 45,
+      "r": 25,
+      "w": 2,
+      "blocks": true
+    },
+    {
+      "src": "pixel-agents/furniture/PLANT_2/PLANT_2.png",
+      "c": 21,
+      "r": 25,
+      "blocks": true
+    },
+    {
+      "src": "pixel-agents/furniture/PLANT_2/PLANT_2.png",
+      "c": 26,
+      "r": 25,
+      "blocks": true
+    }
+  ],
+  "rugs": [
+    {
+      "c": 2,
+      "r": 5,
+      "w": 14,
+      "h": 5,
+      "color": "#747376",
+      "border": "#68748a"
+    },
+    {
+      "c": 17,
+      "r": 5,
+      "w": 14,
+      "h": 5,
+      "color": "#966c53",
+      "border": "#a4684e"
+    },
+    {
+      "c": 32,
+      "r": 5,
+      "w": 14,
+      "h": 5,
+      "color": "#866a75",
+      "border": "#876489"
+    },
+    {
+      "c": 2,
+      "r": 18,
+      "w": 14,
+      "h": 5,
+      "color": "#6e7d68",
+      "border": "#5e8672"
+    },
+    {
+      "c": 17,
+      "r": 18,
+      "w": 14,
+      "h": 5,
+      "color": "#976a65",
+      "border": "#a4646d"
+    },
+    {
+      "c": 32,
+      "r": 18,
+      "w": 14,
+      "h": 5,
+      "color": "#827750",
+      "border": "#807b49"
+    },
+    {
+      "c": 19,
+      "r": 10,
+      "w": 10,
+      "h": 6,
+      "color": "#8a6a4e",
+      "border": "#6b4f39"
+    }
+  ],
+  "glows": [
+    {
+      "c": 22,
+      "r": 2,
+      "color": "#ffcf80",
+      "radius": 30,
+      "alpha": 0.18
+    },
+    {
+      "c": 25,
+      "r": 2,
+      "color": "#ffcf80",
+      "radius": 30,
+      "alpha": 0.18
+    },
+    {
+      "c": 23,
+      "r": 10,
+      "color": "#9fd4ff",
+      "radius": 26,
+      "alpha": 0.12
+    }
+  ]
+}

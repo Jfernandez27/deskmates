@@ -1,0 +1,10 @@
+{
+  "id": "beach",
+  "label": "Beach",
+  "floor": "pixel-agents/floors/floor_6.png",
+  "floorTint": "#e8d39a",
+  "wallTint": "#bfe3f0",
+  "page": { "bg": "#10202a", "fg": "#f2f0e6", "muted": "#9db3bd", "card": "#18303c", "line": "#24414f" },
+  "night": null,
+  "decor": [{ "src": "themes/beach/PARASOL.png", "c": 18, "r": 12, "blocks": true }]
+}

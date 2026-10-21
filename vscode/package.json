@@ -1,0 +1,22 @@
+{
+  "name": "deskmates-vscode",
+  "displayName": "deskmates",
+  "description": "See your AI coding agents working in a pixel-art office, in a VS Code panel.",
+  "version": "0.1.0",
+  "publisher": "jfernandez27",
+  "license": "MIT",
+  "engines": { "vscode": "^1.105.0" },
+  "categories": ["Visualization", "Other"],
+  "main": "./out/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "commands": [{ "command": "deskmates.open", "title": "deskmates: Open office" }],
+    "configuration": {
+      "title": "deskmates",
+      "properties": {
+        "deskmates.port": { "type": "number", "default": 47821, "description": "Port of the local deskmates service (deskmates serve)." }
+      }
+    }
+  },
+  "scripts": { "build": "tsc -p ." }
+}

@@ -1,0 +1,53 @@
+{
+  "_comment": "dx/dy: offset from the frame's left edge and from the top of the character's head, in source pixels. held: carried in the hand, so only drawn facing the viewer. Drawn for deskmates, MIT; the held ones by scripts/draw-accessories.py.",
+  "anchors": {
+    "beret": {
+      "dx": 1,
+      "dy": -2
+    },
+    "headset": {
+      "dx": 0,
+      "dy": 2
+    },
+    "notebook": {
+      "dx": 8,
+      "dy": 12,
+      "held": true
+    },
+    "magnifier": {
+      "dx": 8,
+      "dy": 11,
+      "held": true
+    },
+    "folder": {
+      "dx": -1,
+      "dy": 14,
+      "held": true
+    },
+    "toolbox": {
+      "dx": 9,
+      "dy": 14,
+      "held": true
+    },
+    "pen": {
+      "dx": 9,
+      "dy": 11,
+      "held": true
+    },
+    "book": {
+      "dx": 9,
+      "dy": 13,
+      "held": true
+    },
+    "globe": {
+      "dx": 9,
+      "dy": 12,
+      "held": true
+    },
+    "cup": {
+      "dx": 9,
+      "dy": 13,
+      "held": true
+    }
+  }
+}

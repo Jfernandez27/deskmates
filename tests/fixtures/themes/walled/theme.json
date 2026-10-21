@@ -1,0 +1,161 @@
+{
+  "id": "walled",
+  "label": "Walled",
+  "floor": "pixel-agents/floors/floor_6.png",
+  "floorTint": "#e8d39a",
+  "wallTint": "#bfe3f0",
+  "page": {
+    "bg": "#10202a",
+    "fg": "#f2f0e6",
+    "muted": "#9db3bd",
+    "card": "#18303c",
+    "line": "#24414f"
+  },
+  "night": null,
+  "decor": [
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 0,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 1,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 2,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 3,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 4,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 5,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 6,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 7,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 8,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 9,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 10,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 11,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 12,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 13,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 14,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 15,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 16,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 17,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 18,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 19,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 20,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 21,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 22,
+      "r": 11,
+      "blocks": true
+    },
+    {
+      "src": "themes/beach/PARASOL.png",
+      "c": 23,
+      "r": 11,
+      "blocks": true
+    }
+  ]
+}

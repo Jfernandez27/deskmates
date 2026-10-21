@@ -1,0 +1,144 @@
+{
+  "id": "library",
+  "label": "Library",
+  "floor": "pixel-agents/floors/floor_2.png",
+  "floorTint": "#a8784c",
+  "wallTint": "#c9cfb0",
+  "page": {
+    "bg": "#141712",
+    "fg": "#e8e4d6",
+    "muted": "#9a9886",
+    "card": "#1f231c",
+    "line": "#30362b"
+  },
+  "night": null,
+  "removeDecor": [
+    "pixel-agents/furniture/WHITEBOARD/WHITEBOARD.png",
+    "breakroom/TV_1.png",
+    "pixel-agents/furniture/SOFA/SOFA_BACK.png"
+  ],
+  "rugs": [
+    {
+      "c": 2,
+      "r": 3,
+      "w": 15,
+      "h": 4,
+      "color": "#5c2f2a",
+      "border": "#3a1d1a"
+    },
+    {
+      "c": 2,
+      "r": 8,
+      "w": 15,
+      "h": 4,
+      "color": "#2f4a3a",
+      "border": "#1e3026"
+    },
+    {
+      "c": 18,
+      "r": 5,
+      "w": 5,
+      "h": 5,
+      "color": "#6b5a3a",
+      "border": "#463a24"
+    }
+  ],
+  "decor": [
+    {
+      "src": "themes/library/TALL_BOOKSHELF.png",
+      "c": 5,
+      "r": 2,
+      "w": 2,
+      "blocks": true
+    },
+    {
+      "src": "themes/library/TALL_BOOKSHELF_2.png",
+      "c": 8,
+      "r": 2,
+      "w": 2,
+      "blocks": true
+    },
+    {
+      "src": "themes/library/TALL_BOOKSHELF.png",
+      "c": 11,
+      "r": 2,
+      "w": 2,
+      "blocks": true
+    },
+    {
+      "src": "pixel-agents/furniture/DOUBLE_BOOKSHELF/DOUBLE_BOOKSHELF.png",
+      "c": 15,
+      "r": 2,
+      "w": 2,
+      "blocks": true
+    },
+    {
+      "src": "themes/library/TALL_BOOKSHELF.png",
+      "c": 18,
+      "r": 2,
+      "w": 2,
+      "blocks": true
+    },
+    {
+      "src": "themes/library/TALL_BOOKSHELF_2.png",
+      "c": 20,
+      "r": 2,
+      "w": 2,
+      "blocks": true
+    },
+    {
+      "src": "themes/cozy/FLOOR_LAMP.png",
+      "c": 5,
+      "r": 4,
+      "blocks": true
+    },
+    {
+      "src": "themes/cozy/FLOOR_LAMP.png",
+      "c": 13,
+      "r": 4,
+      "blocks": true
+    },
+    {
+      "src": "themes/cozy/FLOOR_LAMP.png",
+      "c": 5,
+      "r": 9,
+      "blocks": true
+    },
+    {
+      "src": "themes/cozy/FLOOR_LAMP.png",
+      "c": 13,
+      "r": 9,
+      "blocks": true
+    }
+  ],
+  "glows": [
+    {
+      "c": 5,
+      "r": 3,
+      "color": "#ffd27a",
+      "radius": 30,
+      "alpha": 0.2
+    },
+    {
+      "c": 13,
+      "r": 3,
+      "color": "#ffd27a",
+      "radius": 30,
+      "alpha": 0.2
+    },
+    {
+      "c": 5,
+      "r": 8,
+      "color": "#ffd27a",
+      "radius": 30,
+      "alpha": 0.2
+    },
+    {
+      "c": 13,
+      "r": 8,
+      "color": "#ffd27a",
+      "radius": 30,
+      "alpha": 0.2
+    }
+  ]
+}

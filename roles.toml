@@ -1,0 +1,41 @@
+# Outfit by agent role (spec §6.1). `match` is compared with the agent name,
+# with or without its plugin prefix ("id3a:designer" matches "designer").
+# computer = "laptop" (default) | "mac" (silver laptop) | "pc" (tower).
+# Override or extend in ~/.config/deskmates/roles.toml.
+
+[roles.designer]
+match = ["designer"]
+color = "#7A4FD6"
+accessory = "beret"
+computer = "mac"
+
+[roles.community-manager]
+match = ["community-manager"]
+color = "#1F9E89"
+accessory = "headset"
+
+[roles.content-creator]
+match = ["content-creator"]
+color = "#E0832B"
+accessory = "notebook"
+computer = "laptop"
+
+[roles.explore]
+match = ["Explore", "cavecrew-investigator"]
+accessory = "magnifier"
+
+[roles.plan]
+match = ["Plan"]
+accessory = "folder"
+[roles.general-purpose]
+match = ["general-purpose", "cavecrew-builder"]
+accessory = "toolbox"
+[roles.reviewer]
+match = ["code-reviewer", "cavecrew-reviewer", "reviewer"]
+accessory = "pen"
+[roles.guide]
+match = ["claude-code-guide"]
+accessory = "book"
+[roles.researcher]
+match = ["researcher", "deep-research"]
+accessory = "globe"
