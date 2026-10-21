@@ -9,11 +9,10 @@ Every AI coding agent on your machine becomes a character: Claude Code, Codex (C
 ## Quick start
 
 ```bash
-git clone https://github.com/Jfernandez27/deskmates.git && cd deskmates
-npm install
-npm start                      # builds the page and serves it at http://127.0.0.1:47821
-node bin/deskmates.ts demo     # in another terminal: simulated agents, meetings, a waiting agent, a subagent
-node bin/deskmates.ts connect  # when you are ready: your Claude Code sessions walk in
+npm install -g deskmates
+deskmates serve                # the office at http://127.0.0.1:47821
+deskmates demo                 # in another terminal: simulated agents, meetings, a waiting agent, a subagent
+deskmates connect              # when you are ready: your Claude Code sessions walk in
 ```
 
 `demo --agents 12 --meetings 2 --minutes 0` and more options in [Getting started](docs/getting-started.md#demo-mode). Codex, Copilot CLI, Cursor and Gemini CLI need no setup.
@@ -56,7 +55,17 @@ node bin/deskmates.ts connect  # when you are ready: your Claude Code sessions w
 
 ## Install
 
-The [Quick start](#quick-start) runs it from a clone. `npm start` is `vite build && node bin/deskmates.ts serve`. To call the CLI as `deskmates`, run `npm link` once; after that, `npm run build` (web page and CLI bundle) refreshes the linked install after a `git pull`. A packaged build installs with `npm install -g deskmates-0.1.0.tgz` (from `npm pack`); publishing to the npm registry is up to the maintainer.
+`npm install -g deskmates` installs the `deskmates` command; `npm update -g deskmates` brings it up to date.
+
+To run it from a clone instead (to change it, or to follow `main`):
+
+```bash
+git clone https://github.com/Jfernandez27/deskmates.git && cd deskmates
+npm install
+npm start                      # vite build && node bin/deskmates.ts serve
+```
+
+Run `npm link` once to call that clone as `deskmates`; after a `git pull`, `npm run build` (web page and CLI bundle) refreshes it.
 
 ## Connect a Claude Code profile
 
