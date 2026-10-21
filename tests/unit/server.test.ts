@@ -282,3 +282,25 @@ describe("shared office", () => {
     await expect(startServer({ ...mkBase(), shared: true })).rejects.toThrow("a shared office needs a token");
   });
 });
+
+test("the page's files never leave the web folder, however the path is spelled", async () => {
+  const root = mkdtempSync(join(tmpdir(), "dm-root-"));
+  const web = join(root, "web");
+  mkdirSync(web);
+  writeFileSync(join(web, "index.html"), "<p>office</p>");
+  writeFileSync(join(root, "secret.txt"), "outside");
+  srv = await startServer({ port: 0, webDir: web });
+  const { request } = await import("node:http");
+  // raw paths: fetch() would normalise the dots away before sending
+  const get = (path: string) => new Promise<{ status: number; body: string }>((ok, fail) => {
+    const r = request({ host: "127.0.0.1", port: srv!.port, path }, (res) => {
+      let body = ""; res.on("data", (c) => (body += c)); res.on("end", () => ok({ status: res.statusCode ?? 0, body }));
+    });
+    r.on("error", fail); r.end();
+  });
+  expect((await get("/index.html")).body).toBe("<p>office</p>");
+  for (const path of ["/../secret.txt", "/..%2fsecret.txt", "/%2e%2e/secret.txt", "/%2e%2e%2fsecret.txt", "/..%5csecret.txt", "/web/../../secret.txt", `/${encodeURIComponent(join(root, "secret.txt"))}`]) {
+    const r = await get(path);
+    expect(r.body, path).not.toContain("outside");
+  }
+});
