@@ -13,27 +13,31 @@ Linux and macOS are supported. On Windows use WSL.
 
 ## Install
 
-From the repository:
+From npm:
+
+```bash
+npm install -g deskmates
+npm update -g deskmates     # later, to get a new version
+```
+
+From the repository, to change it or follow `main`:
 
 ```bash
 git clone https://github.com/Jfernandez27/deskmates.git
 cd deskmates
 npm install
 npm link            # optional: makes `deskmates` available everywhere
+npm run build       # after each `git pull`: rebuilds the page and the CLI the link points to
 ```
 
-From a packaged build (`npm pack` produces `deskmates-<version>.tgz`):
-
-```bash
-npm install -g ./deskmates-0.1.0.tgz
-```
+Each [GitHub release](https://github.com/Jfernandez27/deskmates/releases) also carries the package file: `npm install -g ./deskmates-<version>.tgz`.
 
 ## First run
 
 1. **Start the office.**
    ```bash
-   npm start                      # from the repository: builds the page, then `deskmates serve`
-   deskmates serve                # if installed or linked
+   deskmates serve                # installed from npm, or linked
+   npm start                      # from a clone without npm link: builds the page, then serves
    ```
    Open <http://127.0.0.1:47821>.
 2. **Connect Claude Code.** Once per profile:
