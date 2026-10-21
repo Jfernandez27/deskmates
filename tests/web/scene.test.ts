@@ -527,7 +527,7 @@ test("pets bump into each other instead of walking through: they never overlap",
     }
     expect(bumps, `${pets} rooms ${rooms}`).toBeGreaterThan(0);
   }
-});
+}, 30_000); // four scenes of pets walking: about 2 s here, past the 5 s default on a busy CI runner
 
 test("an agent done for now shows a check at its desk; working or asleep it does not", () => {
   const s = new Scene(true);
