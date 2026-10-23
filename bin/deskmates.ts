@@ -59,7 +59,7 @@ async function main() {
       if (shared && !lan) console.error("note: --shared without --lan only listens on 127.0.0.1; add --lan so other PCs can relay to it");
       const token = loadOrCreateToken();
       const addresses = rankAddresses(networkInterfaces());
-      const s = await startServer({ port, webDir: WEB, token, transcripts, lan, addresses, theme: flag("theme"), themesDir: flag("themes"), historyDir: defaultHistoryDir(), relay, shared });
+      const s = await startServer({ port, webDir: WEB, token, transcripts, lan, addresses: () => rankAddresses(networkInterfaces()), theme: flag("theme"), themesDir: flag("themes"), historyDir: defaultHistoryDir(), relay, shared });
       console.log(`deskmates: http://127.0.0.1:${s.port}`);
       if (transcripts.length) console.log(`following transcripts of: ${transcripts.map((t) => t.source).join(", ")}`);
       console.log(`ingest API token: ${TOKEN_FILE}`);
