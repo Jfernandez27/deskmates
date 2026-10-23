@@ -35,3 +35,17 @@ test("a theme that no longer exists shows the theme drawn in the selector, not a
   await page.waitForSelector("body[data-ready='1']");
   await expect(page.locator("#theme")).toHaveValue("day");
 });
+
+test("a tapped card follows its agent: new status shown, closed when it leaves", async ({ page }) => {
+  await page.goto("/?demo&t=1000");
+  await page.waitForSelector("body[data-ready='1']");
+  await page.evaluate((m) => (window as any).__deskmates.setState(m), msg([agent("a", 0)]));
+  await page.evaluate(() => (window as any).__deskmates.advance(10_000));
+  const [box] = await page.evaluate(() => (window as any).__deskmates.hits());
+  await page.locator("#office").click({ position: { x: box.x + box.w / 2, y: box.y + box.h / 2 } });
+  await expect(page.locator("#card")).toContainText("working");
+  await page.evaluate((m) => (window as any).__deskmates.setState(m), msg([agent("a", 0, "waiting")]));
+  await expect(page.locator("#card")).toContainText("waiting");
+  await page.evaluate((m) => (window as any).__deskmates.setState(m), msg([]));
+  await expect(page.locator("#card")).toBeHidden();
+});
