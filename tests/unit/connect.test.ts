@@ -1,8 +1,8 @@
 import { test, expect } from "vitest";
-import { mkdtempSync, writeFileSync, readFileSync, readdirSync, existsSync, renameSync, symlinkSync, lstatSync } from "node:fs";
+import { mkdtempSync, writeFileSync, readFileSync, readdirSync, existsSync, mkdirSync, renameSync, symlinkSync, lstatSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { connect, disconnect, HOOK_EVENTS, status } from "../../src/cli/connect.ts";
+import { connect, disconnect, findProfiles, HOOK_EVENTS, status } from "../../src/cli/connect.ts";
 
 const HOOK = "/opt/deskmates/bin/deskmates-hook.sh";
 const existing = {
@@ -100,4 +100,28 @@ test("a settings.json that is a symlink (stow, home-manager) stays a symlink; it
   expect(disconnect(p.dir)).toBe(true);
   expect(lstatSync(p.file).isSymbolicLink()).toBe(true);
   expect(readFileSync(real, "utf8")).toBe(p.text);
+});
+
+test("findProfiles: every ~/.claude* directory that is a Claude profile, plus CLAUDE_CONFIG_DIR, once each", () => {
+  const home = mkdtempSync(join(tmpdir(), "dm-home-"));
+  for (const d of [".claude", ".claude-work", ".claude-personal", ".claude-empty", "elsewhere"]) mkdirSync(join(home, d));
+  writeFileSync(join(home, ".claude", "settings.json"), "{}");
+  mkdirSync(join(home, ".claude-work", "projects"));
+  writeFileSync(join(home, ".claude-personal", "settings.json"), "{}");
+  writeFileSync(join(home, ".claude.json"), "{}");
+  mkdirSync(join(home, "elsewhere", "projects"));
+  expect(findProfiles(home, [join(home, "elsewhere"), join(home, ".claude")])).toEqual(
+    [".claude", ".claude-personal", ".claude-work", "elsewhere"].map((d) => join(home, d)),
+  );
+});
+
+test("status: a hook path reached through a symlink (npm link, nvm) is not stale", () => {
+  const p = profile();
+  const pkg = mkdtempSync(join(tmpdir(), "dm-pkg-"));
+  mkdirSync(join(pkg, "bin"));
+  writeFileSync(join(pkg, "bin", "deskmates-hook.sh"), "");
+  const linked = join(mkdtempSync(join(tmpdir(), "dm-global-")), "deskmates");
+  symlinkSync(pkg, linked);
+  connect(p.dir, join(linked, "bin", "deskmates-hook.sh"));
+  expect(status(p.dir, join(pkg, "bin", "deskmates-hook.sh"))).toMatchObject({ connected: true, stale: false });
 });

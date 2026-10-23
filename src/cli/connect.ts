@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, existsSync, copyFileSync, renameSync, statSync, chmodSync, realpathSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, copyFileSync, renameSync, statSync, chmodSync, realpathSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 /** Claude Code hook events deskmates listens to. */
@@ -90,6 +90,22 @@ export function status(profileDir: string, hookPath: string) {
   if (!existsSync(file)) return { connected: false, entries: 0, stale: false };
   const { data } = read(file);
   const ours = Object.values(data.hooks ?? {}).flat().filter(isOurs);
-  const stale = ours.some((h) => h.hooks?.[0]?.command !== quote(hookPath));
+  const stale = ours.some((h) => !samePath(unquote(h.hooks?.[0]?.command ?? ""), hookPath));
   return { connected: ours.length > 0, entries: ours.length, stale };
+}
+
+const unquote = (cmd: string) => (/^'.*'$/s.test(cmd) ? cmd.slice(1, -1).replace(/'\\''/g, "'") : cmd);
+const real = (p: string) => { try { return realpathSync(p); } catch { return p; } };
+/** The same file, also when one path goes through a symlink (npm link, a global install under nvm). */
+const samePath = (a: string, b: string) => a === b || real(a) === real(b);
+
+/** A Claude Code profile is a config dir with a settings.json or a projects/ folder. */
+const isProfile = (dir: string) => existsSync(join(dir, "settings.json")) || existsSync(join(dir, "projects"));
+
+/** Every ~/.claude* profile, plus the given dirs (CLAUDE_CONFIG_DIR, --profile) that are profiles; sorted, each once. */
+export function findProfiles(home: string, extra: (string | undefined)[] = []): string[] {
+  let names: string[] = [];
+  try { names = readdirSync(home).filter((n) => n.startsWith(".claude")); } catch { /* no home */ }
+  const dirs = [...names.map((n) => join(home, n)), ...extra.filter((d): d is string => !!d)];
+  return [...new Set(dirs.filter(isProfile))].sort();
 }
