@@ -58,6 +58,19 @@ test("leaving walks to the door and then disappears, also when the server alread
   expect(s.actors.size).toBe(0);
 });
 
+test("an agent missing from one message (the server restarted) and back at the same desk sits down again instead of walking out", () => {
+  const s = new Scene();
+  s.update([ch({})]); s.step(10_000);
+  s.update([]);
+  expect(s.actors.get("k")!.leaving).toBe(true);
+  s.update([ch({})]);
+  const a = s.actors.get("k")!;
+  expect(a.leaving).toBe(false);
+  s.step(10_000);
+  expect(s.actors.has("k")).toBe(true);
+  expect([a.x, a.y]).toEqual([deskAt(ROOM, 0).seat.c, deskAt(ROOM, 0).seat.r]);
+});
+
 test("desks in the second room put the actor in room 1", () => {
   const s = new Scene(true);
   s.update([ch({ desk: 9 })]);
