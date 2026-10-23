@@ -63,3 +63,20 @@ test("DESKMATES_NAME names the session, accents and all, but not its subagents",
   expect(chars.find((c) => !c.parent)).toMatchObject({ name: "Sofía", label: "claude-work · Sofía" });
   expect(chars.find((c) => c.parent)?.name).toBeUndefined();
 });
+
+test("a service that takes the connection and never answers still costs the agent at most ~50 ms", async () => {
+  const hung = createServer(() => { /* never answers */ });
+  await new Promise<void>((ok) => hung.listen(0, "127.0.0.1", ok));
+  const port = (hung.address() as { port: number }).port;
+  try {
+    // async spawn: the hung server lives in this process and must keep accepting while the hook runs
+    const r = await new Promise<{ code: number | null; ms: number }>((ok) => {
+      const t = performance.now();
+      const c = spawn(HOOK, { env: { ...process.env, DESKMATES_PORT: String(port) }, stdio: ["pipe", "ignore", "ignore"] });
+      c.stdin.end(payload);
+      c.on("exit", (code) => ok({ code, ms: performance.now() - t }));
+    });
+    expect(r.code).toBe(0);
+    expect(r.ms).toBeLessThan(500);
+  } finally { hung.closeAllConnections(); hung.close(); }
+});
