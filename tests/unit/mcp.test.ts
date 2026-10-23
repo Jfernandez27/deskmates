@@ -246,3 +246,13 @@ test("`deskmates mcp` CLI: reads the token file, answers on stdout, and ends the
   const msgs = out.trim().split("\n").map((l) => JSON.parse(l));
   expect(msgs.map((m) => m.id)).toEqual([1, 2]); // stdout holds MCP messages only
 }, 15_000);
+
+test("office_status refuses state names that only exist on Object.prototype", async () => {
+  const c = client(await boot());
+  await c.init();
+  for (const state of ["toString", "__proto__", "constructor"]) {
+    const r = await c.request("tools/call", { name: "office_status", arguments: { state } });
+    expect(JSON.stringify(r)).toContain("state must be one of working, waiting, idle");
+  }
+  await c.close();
+});

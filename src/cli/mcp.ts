@@ -195,7 +195,7 @@ export async function runMcp(o: McpOptions): Promise<void> {
       }
       case "office_status": {
         const kinds: Record<string, EventKind> = { working: "tool", waiting: "waiting", idle: "idle" };
-        const kind = kinds[a.state as string];
+        const kind = typeof a.state === "string" && Object.hasOwn(kinds, a.state) ? kinds[a.state] : undefined;
         if (!kind) throw new InvalidArgs("state must be one of working, waiting, idle");
         const tool = optStr(a, "tool", 80);
         // Same rule as the hooks: one short line, clipped to 120 chars.
