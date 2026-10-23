@@ -61,6 +61,13 @@ test("websocket: another site's page cannot read the office (Origin must be the 
   expect(await first(`http://localhost:${srv!.port}`)).toBe("closed 1008");
   expect(await first(url)).toBe("state");
   expect(await first()).toBe("state");
+  // a forwarding proxy (Codespaces) keeps the page's host in x-forwarded-host
+  const viaProxy = await new Promise<string>((ok) => {
+    const ws = new WebSocket(url.replace("http", "ws") + "/ws", { origin: "https://fox-47821.app.github.dev", headers: { "x-forwarded-host": "fox-47821.app.github.dev" } });
+    ws.on("message", (d) => { ok(JSON.parse(String(d)).type); ws.close(); });
+    ws.on("close", (code) => ok(`closed ${code}`));
+  });
+  expect(viaProxy).toBe("state");
 });
 
 test("someone walking into an empty office starts a new deal, which holds while anyone is in", async () => {

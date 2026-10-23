@@ -162,7 +162,9 @@ export async function startServer(opts: Options): Promise<Running> {
   const ownPage = (req: IncomingMessage): boolean => {
     const origin = req.headers.origin;
     if (origin === undefined) return true;
-    try { return new URL(origin).host === req.headers.host; } catch { return false; }
+    // behind a forwarding proxy (VS Code in Codespaces) the page's host arrives as x-forwarded-host; a browser cannot set it on a socket
+    const forwarded = String(req.headers["x-forwarded-host"] ?? "").split(",")[0].trim();
+    try { const host = new URL(origin).host; return host === req.headers.host || (!!forwarded && host === forwarded); } catch { return false; }
   };
   const roles: Role[] = loadRoles(opts.rolesFile ?? join(configDir(), "roles.toml"));
   const assetsDir = opts.assetsDir ?? join(packageRoot(), "assets");
