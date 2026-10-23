@@ -239,7 +239,7 @@ export class Scene {
         this.route(a, deskAt(this._floor, ch.desk).seat);
       }
       if (ch.desk === null && !a.leaving) this.leave(a);
-      else if (ch.desk !== null && ch.desk !== prevDesk) {
+      else if (ch.desk !== null && (ch.desk !== prevDesk || a.leaving)) {
         a.leaving = false; a.handover = null; a.onBreak = null; a.meeting = null;
         if (deskAt(this._floor, ch.desk).room !== a.room) { a.room = deskAt(this._floor, ch.desk).room; a.x = this._floor.door.c; a.y = this._floor.door.r; }
         this.route(a, deskAt(this._floor, ch.desk).seat);
