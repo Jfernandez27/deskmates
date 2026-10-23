@@ -58,3 +58,11 @@ test("runner hooks also work when installed in one folder next to remote-agent.s
   expect((await run(join(dir, "job-started.sh"), [], env)).code).toBe(0);
   expect(Object.values(srv!.state().characters)[0]).toMatchObject({ session: "8-build" });
 });
+
+test("a URL ending in /, fields over the office's limits and a backslash at the cut still make one valid event", async () => {
+  const url = await boot();
+  const detail = "x".repeat(119) + "\\" + "tail";
+  const r = await run(SCRIPT, ["tool", "deploy", "d-2", "a".repeat(100), "/srv/app", "T".repeat(90), detail], { DESKMATES_URL: `${url}/`, DESKMATES_TOKEN: TOKEN });
+  expect(r.code).toBe(0);
+  expect(Object.values(srv!.state().characters)[0]).toMatchObject({ source: "deploy", agent: "a".repeat(80), tool: "T".repeat(80), detail: "x".repeat(119) + "\\" });
+});
