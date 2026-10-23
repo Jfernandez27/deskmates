@@ -211,17 +211,28 @@ export async function startServer(opts: Options): Promise<Running> {
    * Only sessions still without one are looked up, all with a single process listing.
    */
   const procLister = opts.procLister ?? defaultLister();
+  const procScanMs = opts.procScanMs ?? 5000;
+  /** sessions not found yet wait twice as long each time (up to 5 min): two sessions of a tool in one folder never resolve */
+  const lookups = new Map<string, { tries: number; next: number }>();
   let scanning = false;
   const findToolPids = async () => {
-    const todo = Object.values(state.characters).filter((c) => TOOL_PROCESSES[c.source] && c.cwd && c.status !== "leaving" && !pids.has(c.key));
+    const now = Date.now();
+    const todo = Object.values(state.characters).filter((c) => TOOL_PROCESSES[c.source] && c.cwd && c.status !== "leaving" && !pids.has(c.key) && (lookups.get(c.key)?.next ?? 0) <= now);
     if (!todo.length || scanning) return;
     scanning = true;
     try {
       const procs = await procLister([...new Set(todo.flatMap((c) => TOOL_PROCESSES[c.source]))]);
-      for (const c of todo) trackPids(c.key, findToolPid(c.source, c.cwd!, procs));
+      for (const c of todo) {
+        trackPids(c.key, findToolPid(c.source, c.cwd!, procs));
+        if (pids.has(c.key)) { lookups.delete(c.key); continue; }
+        const l = lookups.get(c.key) ?? { tries: 0, next: 0 };
+        l.tries++;
+        l.next = now + Math.min(procScanMs * 2 ** l.tries, 5 * 60_000);
+        lookups.set(c.key, l);
+      }
     } catch { /* try again on the next round */ } finally { scanning = false; }
   };
-  const procTimer = setInterval(() => void findToolPids(), opts.procScanMs ?? 5000);
+  const procTimer = setInterval(() => void findToolPids(), procScanMs);
   procTimer.unref();
 
   /** `local`: the client is on this machine; only then does it get pids. */
@@ -425,6 +436,8 @@ export async function startServer(opts: Options): Promise<Running> {
     if (next !== state) {
       state = next;
       for (const k of pids.keys()) if (!state.characters[k]) pids.delete(k);
+      for (const k of lookups.keys()) if (!state.characters[k]) lookups.delete(k);
+      usage.prune((k) => !!state.characters[k]);
       broadcast();
     }
     rollDay(Date.now());
