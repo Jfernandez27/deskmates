@@ -742,3 +742,11 @@ test("the page opens as many rooms as its own floor needs for the desks in use",
   expect(roomsNeeded([ch({ desk: null, status: "leaving" }), ch({ key: "b", desk: 7 })], ROOM.desksPerRoom)).toBe(1);
   expect(roomsNeeded([ch({ desk: 8 })], ROOM.desksPerRoom)).toBe(2);
 });
+
+test("a session that has done nothing yet rests at its desk without the check of a finished job", () => {
+  const s = new Scene(true);
+  s.update([ch({ status: "idle", workedMs: 0 })]);
+  expect(s.bubble(s.actors.get("k")!)).not.toBe("done");
+  s.update([ch({ status: "idle", workedMs: 90_000 })]);
+  expect(s.bubble(s.actors.get("k")!)).toBe("done");
+});

@@ -57,5 +57,7 @@ export function fromHook(payload: unknown, now: string): AgentEvent[] {
     ev.detail = detailOf(tool, p.tool_input);
   }
   for (const k of Object.keys(ev) as (keyof AgentEvent)[]) if (ev[k] === undefined) delete ev[k];
+  // a session just opened (or resumed, or cleared) rests until you give it something; one restarted by a compaction is mid-task
+  if (name === "SessionStart" && p.source !== "compact") return [ev, { ...ev, kind: "idle" }];
   return [ev];
 }

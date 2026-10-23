@@ -303,8 +303,9 @@ export class Scene {
     if (a.onBreak) {
       if (group.length >= 2 && group[Math.floor(this.clock / TALK_MS) % group.length] === a) return "talk";
     }
-    // done for now and back at the desk: a check, so it does not read as still working (asleep shows its z's instead)
-    if (a.ch.status === "idle" && !a.onBreak && !a.leaving) return "done";
+    // done for now and back at the desk: a check, so it does not read as still working (asleep shows its z's instead);
+    // a session that has not worked yet (workedMs 0: just opened) only rests
+    if (a.ch.status === "idle" && a.ch.workedMs !== 0 && !a.onBreak && !a.leaving) return "done";
     return null;
   }
 

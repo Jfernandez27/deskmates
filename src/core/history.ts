@@ -57,6 +57,9 @@ function markHours(mask: number, from: number, to: number): number {
   return mask;
 }
 
+/** History keeps counts, not paths: only the folder's own name ("/home/j/clients/acme/api" → "api"). */
+const folderName = (cwd: string | undefined) => cwd?.replace(/[\\/]+$/, "").split(/[\\/]/).pop() || undefined;
+
 /** Advances a session's counters to time t, according to the phase it was in. */
 function advance(s: SessionDay, t: number): SessionDay {
   const d = t - s.at;
@@ -86,7 +89,7 @@ export function applyEvent(day: Day, e: AgentEvent): Day {
   if (!s) {
     if (e.kind === "usage" || e.kind === "end") return day; // same rule as the office: these never open a session
     s = {
-      key, source: e.source, profile: e.profile, agent: e.agent, cwd: e.cwd,
+      key, source: e.source, profile: e.profile, agent: e.agent, cwd: folderName(e.cwd),
       parent: e.parent ? keyOf({ ...e, session: e.parent }) : undefined,
       firstSeen: e.ts, lastSeen: e.ts, ended: false, workingMs: 0, waitingMs: 0, tools: 0, hourMask: 0, phase: "idle", at: t,
     };
@@ -99,7 +102,7 @@ export function applyEvent(day: Day, e: AgentEvent): Day {
   s = {
     ...s,
     agent: s.agent ?? e.agent,
-    cwd: s.cwd ?? e.cwd,
+    cwd: s.cwd ?? folderName(e.cwd),
     lastSeen: t >= Date.parse(s.lastSeen) ? new Date(t).toISOString() : s.lastSeen,
     hourMask: s.hourMask | (1 << new Date(t).getHours()),
     tools: s.tools + (e.kind === "tool" && e.tool ? 1 : 0),

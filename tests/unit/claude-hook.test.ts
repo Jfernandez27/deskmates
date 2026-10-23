@@ -20,6 +20,7 @@ test("session with a subagent maps to the expected events", () => {
   const sub = "aaea";
   expect(evs.map((e) => [short(e.session), e.kind, e.tool ?? "", e.detail ?? "", e.parent ? short(e.parent) : ""])).toEqual([
     ["1155", "start", "", "", ""],
+    ["1155", "idle", "", "", ""],   // a new session rests until the prompt
     ["1155", "tool", "", "", ""],
     ["1155", "tool", "Read", "hostname", ""],
     ["1155", "tool", "", "", ""],
@@ -33,12 +34,12 @@ test("session with a subagent maps to the expected events", () => {
     ["1155", "end", "", "", ""],
   ]);
   for (const e of evs) expect(e).toMatchObject({ source: "claude", profile: "claude-work", cwd: "/tmp", ts: NOW, transport: "hook" });
-  expect(evs[5].agent).toBe("Explore");
+  expect(evs[6].agent).toBe("Explore");
 });
 
 test("a --agent session carries its agent name and gets the right label", () => {
   const evs = load("named-agent").flatMap((p) => fromHook(p, NOW));
-  expect(evs.map((e) => e.kind)).toEqual(["start", "tool", "idle", "end"]);
+  expect(evs.map((e) => e.kind)).toEqual(["start", "idle", "tool", "idle", "end"]);
   for (const e of evs) expect(e.agent).toBe("id3a:designer");
   const s = reduce(emptyState(), evs[0]);
   expect(Object.values(s.characters)[0].label).toBe("claude-work · id3a:designer");
@@ -81,4 +82,13 @@ test("unknown events and garbage payloads produce nothing", () => {
   expect(fromHook({ hook_event_name: "Stop" }, NOW)).toEqual([]);
   expect(fromHook(null, NOW)).toEqual([]);
   expect(fromHook("x", NOW)).toEqual([]);
+});
+
+test("a new session rests until you give it something to do; one restarted by a compaction keeps working", () => {
+  const base = { session_id: "s", transcript_path: "/h/.claude/projects/p/s.jsonl", cwd: "/p", hook_event_name: "SessionStart" };
+  for (const source of ["startup", "resume", "clear", undefined])
+    expect(fromHook({ ...base, source }, NOW).map((e) => e.kind)).toEqual(["start", "idle"]);
+  expect(fromHook({ ...base, source: "compact" }, NOW).map((e) => e.kind)).toEqual(["start"]);
+  const s = fromHook({ ...base, source: "startup" }, NOW).reduce(reduce, emptyState());
+  expect(Object.values(s.characters)[0]).toMatchObject({ status: "idle", workedMs: 0 });
 });

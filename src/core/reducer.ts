@@ -100,7 +100,7 @@ export function reduce(state: OfficeState, e: AgentEvent): OfficeState {
       c = { ...c, status: "waiting" };
       break;
     case "idle":
-      c = { ...c, status: "idle", workedMs: c.workingSince !== undefined ? t - c.workingSince : undefined, workingSince: undefined };
+      c = { ...c, status: "idle", workedMs: c.workingSince !== undefined ? t - c.workingSince : c.workedMs, workingSince: undefined };
       break;
     case "end":
       c = { ...c, status: "leaving", leftAt: t, desk: null };
@@ -122,7 +122,8 @@ export function tick(state: OfficeState, now: number): OfficeState {
       characters[k] = c;
     } else if (now - c.lastEventAt > LEAVE_AFTER_MS) {
       characters[k] = { ...c, status: "leaving", leftAt: now, desk: null }; changed = true;
-    } else if (now - c.lastEventAt > SLEEP_AFTER_MS && c.status !== "sleeping") {
+    } else if (now - c.lastEventAt > SLEEP_AFTER_MS && c.status !== "sleeping" && c.status !== "waiting") {
+      // a waiting agent keeps its ? however long you take: it is not idle, it needs you
       characters[k] = { ...c, status: "sleeping" }; changed = true;
     } else characters[k] = c;
   }

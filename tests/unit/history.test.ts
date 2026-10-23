@@ -28,7 +28,7 @@ describe("history aggregator", () => {
     const s = one(d);
     expect(s.workingMs).toBe((5 + 2 + 3) * MIN);
     expect(s.waitingMs).toBe(3 * MIN);
-    expect(s).toMatchObject({ tools: 2, ended: true, agent: "id3a:designer", cwd: "/p/atlas", source: "claude", profile: "claude-work" });
+    expect(s).toMatchObject({ tools: 2, ended: true, agent: "id3a:designer", cwd: "atlas", source: "claude", profile: "claude-work" });
     expect(s.firstSeen).toBe(new Date(T(10)).toISOString());
     expect(s.lastSeen).toBe(new Date(T(11, 3)).toISOString());
     expect(JSON.stringify(d)).not.toContain("secret.ts");
@@ -162,4 +162,9 @@ test("events replayed after a restart (a transcript read again from the start) c
   const twice = run(events, once);
   expect(twice).toEqual(once);
   expect(one(twice).tools).toBe(2);
+});
+
+test("history keeps the folder's name, not its full path", () => {
+  const d = run([ev("start", T(10), { cwd: "/home/someone/clients/acme/api" })]);
+  expect(one(d).cwd).toBe("api");
 });

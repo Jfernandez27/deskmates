@@ -11,10 +11,11 @@ Every agent session is a character. Its seat, pose and bubble tell you what it i
 | Walks in through the door to a desk | a session started |
 | Typing, screen flickering | it is editing or running something (Edit, Write, Bash…) |
 | Reading a page | it is reading or searching (Read, Grep, Glob…) |
-| **?** over its head, a sound | it is waiting for you: a permission prompt or a question |
+| **?** over its head, a sound | it is waiting for you: a permission prompt or a question; it keeps the **?** however long you take |
 | Takes a break (a drink, a coffee, the sofa, a game on the TV) | it finished (or has waited for you more than 15 s); it comes back when work resumes, the **?** follows it |
 | Sits at the meeting table with a "…" or a little chart | two free agents working in the same folder |
-| **zzz** | no activity for 10 minutes |
+| Sits at its desk with nothing over its head | a session just opened, resting until you give it something to do |
+| **zzz** | no activity for 10 minutes (never while it waits for you) |
 | Walks out | the session ended, or 30 quiet minutes passed |
 | A label starting with ↳ | a subagent; it wears its parent's team colour on its chest and both labels carry it as a stripe; when it finishes it stops by its parent's seat with a document, then leaves |
 | Paper stacks on the desk | tokens the session has written: more paper, more tokens |
@@ -73,7 +74,7 @@ Six pets live in the office: Claudio, Gitcat, Pascal (a tuxedo cat), Biscuit (a 
 
 ## History
 
-**History** in the header shows today: sessions, working time and tokens in total, active agents per hour, and a timeline of every session with its working and waiting time and tokens (subagents under their parent). Each day is kept in `~/.local/state/deskmates/history/YYYY-MM-DD.json` (or under `$XDG_STATE_HOME`); a past day is at `/v1/history?date=YYYY-MM-DD`. Only names, folders, times and token counts are stored.
+**History** in the header shows today: sessions, working time and tokens in total, active agents per hour, and a timeline of every session with its working and waiting time and tokens (subagents under their parent). Each day is kept in `~/.local/state/deskmates/history/YYYY-MM-DD.json` (or under `$XDG_STATE_HOME`); a past day is at `/v1/history?date=YYYY-MM-DD`. Only names, folder names (not their full paths), times and token counts are stored.
 
 ## Watch from your phone or another computer
 
