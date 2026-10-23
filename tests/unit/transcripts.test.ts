@@ -132,3 +132,13 @@ test("watcher: replays active files, skips files that were quiet at startup, fol
   expect(seen[0]).toBe("live:start");
   expect(seen.slice(1).sort()).toEqual(["live:idle", "old:idle"]);
 });
+
+test("gemini: a message written again as its tool call finishes does not run the tool twice", () => {
+  const ctx: FileCtx = { path: "/h/.gemini/tmp/proj/chats/session-1.jsonl", mtime: 0, state: {} };
+  const msg = (status: string) => ({ id: "m2", timestamp: "2026-10-14T03:15:06.000Z", type: "gemini", toolCalls: [{ id: "c1", name: "read_file", args: { file_path: "a.ts" }, status }] });
+  gemini.decode({ sessionId: "s" }, ctx);
+  const tools = [msg("executing"), msg("success")].flatMap((m) => gemini.decode(m, ctx)).filter((e) => e.kind === "tool");
+  expect(tools).toHaveLength(1);
+  const next = gemini.decode({ ...msg("executing"), toolCalls: [{ id: "c1", name: "read_file", status: "success" }, { id: "c2", name: "run_shell_command", args: { command: "npm test" }, status: "executing" }] }, ctx);
+  expect(next.filter((e) => e.kind === "tool").map((e) => e.tool)).toEqual(["run_shell_command"]);
+});
