@@ -11,20 +11,69 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # the oldest node package.json allows, and the current LTS
+        node: ["22.18.0", "24"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
-      - run: npx playwright install --with-deps chromium
-      - run: npm run e2e
+      # screenshots are compared once: the page does not depend on the service's node
+      - if: matrix.node == '24'
+        run: npx playwright install --with-deps chromium
+      - if: matrix.node == '24'
+        run: npm run e2e
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: test-results
+          name: test-results-${{ matrix.node }}
           path: test-results/
           if-no-files-found: ignore
+
+  # what npm users get: the packed tarball, installed globally, starts and serves the page
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.18.0"
+          cache: npm
+      - run: npm ci
+      - run: npm pack
+      - name: Install the tarball and run it
+        run: |
+          prefix="$RUNNER_TEMP/global"
+          npm install -g --prefix "$prefix" ./deskmates-*.tgz
+          export PATH="$prefix/bin:$PATH" HOME="$RUNNER_TEMP/home"
+          mkdir -p "$HOME"
+          deskmates --version
+          deskmates --help > /dev/null
+          deskmates serve --no-transcripts --port 47999 &
+          for i in $(seq 1 50); do curl -sf http://127.0.0.1:47999/healthz > /dev/null && break; sleep 0.2; done
+          curl -sf http://127.0.0.1:47999/ | grep -q '<canvas'
+          curl -sf http://127.0.0.1:47999/assets/themes/index.json > /dev/null
+          # no Claude profile on the runner, so doctor exits 1; what matters is that it finds the service
+          deskmates doctor --port 47999 > doctor.txt || true
+          cat doctor.txt
+          grep -q "service up on port" doctor.txt || { echo "doctor did not find the service"; exit 1; }
+
+  vscode:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Type-check the extension
+        working-directory: vscode
+        run: |
+          npm install --no-save typescript @types/vscode@1.105.0 @types/node
+          npx tsc -p . --noEmit
