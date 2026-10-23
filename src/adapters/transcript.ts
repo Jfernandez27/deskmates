@@ -1,6 +1,6 @@
 import { glob, stat } from "node:fs/promises";
 import type { AgentEvent } from "../types/events.ts";
-import { LineTail } from "./tail.ts";
+import { LineTail, firstLine } from "./tail.ts";
 
 /** Per-file context an adapter can use: transcripts often put the session id only on their first line. */
 export type FileCtx = { path: string; mtime: number; state: Record<string, unknown> };
@@ -17,6 +17,7 @@ type Watched = { adapter: TranscriptAdapter; tail: LineTail; ctx: FileCtx };
 /**
  * Polls transcript files of tools that have no usable hooks. Files that were already quiet when
  * deskmates started are skipped to their end, so old sessions do not walk in; anything active or new is replayed.
+ * A skipped file's first line is still decoded, silently: it is where codex and gemini name the session, so one resumed later shows up.
  */
 export class TranscriptWatcher {
   private files = new Map<string, Watched>();
@@ -61,6 +62,10 @@ export class TranscriptWatcher {
       const stale = this.first && now - info.mtimeMs > (this.opts.recentMs ?? 30 * 60_000);
       w = { adapter, tail: new LineTail(path, stale ? info.size : 0), ctx: { path, mtime: info.mtimeMs, state: {} } };
       this.files.set(path, w);
+      if (stale) {
+        const head = await firstLine(path);
+        try { if (head) adapter.decode(JSON.parse(head), w.ctx); } catch { /* a bad header only means the session stays unnamed */ }
+      }
     }
     w.ctx.mtime = info.mtimeMs;
     const { lines, reset } = await w.tail.read();
