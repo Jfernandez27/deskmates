@@ -119,6 +119,8 @@ export class Relay {
       this.#stamp({ kind: "end", ts, transport: "api", source: c.source, profile: c.profile, session: c.session, parent: c.parent }) ?? []);
     this.#queue.unshift(...ends);
     while (this.#queue.length > this.#buffer) { this.#queue.pop(); this.#dropped++; }
+    // one last try even during a 429 pause: there is no later
+    this.#pausedUntil = -Infinity;
     let timer: ReturnType<typeof setTimeout> | undefined;
     await Promise.race([this.flush(), new Promise<void>((ok) => { timer = setTimeout(ok, TIMEOUT_MS); })]);
     clearTimeout(timer);
