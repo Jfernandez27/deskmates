@@ -78,7 +78,9 @@ export async function loadAssets(): Promise<Assets> {
   };
 }
 
-const asked = new Map<string, "loading" | "failed">();
+/** "loading", or when it last failed: a missing sheet is asked for again a minute later (added since, or the service was down) */
+const asked = new Map<string, "loading" | number>();
+const RETRY_SHEET_MS = 60_000;
 /**
  * Your own character for a role (`character = "<name>"` in roles.toml), fetched from the service the first time it is
  * needed. Until it arrives, or when it is missing or not a 112x96 sheet, the character is dealt from the pool.
@@ -86,15 +88,16 @@ const asked = new Map<string, "loading" | "failed">();
 export function ownSheet(assets: Assets, name: string, loaded: () => void): Sheet | undefined {
   const id = `user:${name}`;
   const have = assets.sheets.get(id);
-  if (have || asked.has(name)) return have;
+  const before = asked.get(name);
+  if (have || before === "loading" || (typeof before === "number" && Date.now() - before < RETRY_SHEET_MS)) return have;
   asked.set(name, "loading");
   const i = new Image();
   i.onload = () => {
-    if (i.width !== 112 || i.height !== 96) { asked.set(name, "failed"); console.warn(`deskmates: character ${name} must be 112x96`); return; }
+    if (i.width !== 112 || i.height !== 96) { asked.set(name, Date.now()); console.warn(`deskmates: character ${name} must be 112x96`); return; }
     assets.sheets.set(id, { img: i, headTop: headTops(i) });
     loaded();
   };
-  i.onerror = () => { asked.set(name, "failed"); console.warn(`deskmates: character ${name} not found in ~/.config/deskmates/characters/`); };
+  i.onerror = () => { asked.set(name, Date.now()); if (before === undefined) console.warn(`deskmates: character ${name} not found in ~/.config/deskmates/characters/`); };
   i.src = `/v1/characters/${encodeURIComponent(name)}.png`;
   return undefined;
 }

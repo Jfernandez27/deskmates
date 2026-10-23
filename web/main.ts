@@ -170,6 +170,7 @@ function apply(msg: StateMessage) {
   scene.update(chars);
   renderSummary();
   renderRoster();
+  if (shown && !card.hidden) { const a = scene.actors.get(shown.key); showCard(a && !a.leaving ? { actor: a } : undefined, shown.x, shown.y); }
   if (!quiet && (!demo || params.has("alerts"))) for (const a of alerts.next(chars)) { deliver(a); announce.textContent = `${a.title}.`; }
 }
 
@@ -210,8 +211,11 @@ mute.addEventListener("click", () => {
 renderMute();
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
-function showCard(h: Hit | undefined, px: number, py: number) {
-  if (!h) { card.hidden = true; return; }
+/** the agent whose card is open and where; a tapped card (touch) stays open, so it follows each new state */
+let shown: { key: string; x: number; y: number } | undefined;
+function showCard(h: Pick<Hit, "actor"> | undefined, px: number, py: number) {
+  if (!h) { card.hidden = true; shown = undefined; return; }
+  shown = { key: h.actor.key, x: px, y: py };
   const c = h.actor.ch;
   const tok = c.tokens ? `${fmtTokens(c.tokens.input + c.tokens.output)} in/out · ${fmtTokens(c.tokens.cacheRead ?? 0)} cache read` : "—";
   const sw = c.outfit?.color ? `<span class="swatch" style="background:${esc(c.outfit.color)}"></span>` : "";
@@ -232,7 +236,7 @@ function hitAt(e: PointerEvent | MouseEvent) {
   return hits.find((h) => x >= h.x && x < h.x + h.w && y >= h.y && y < h.y + h.h);
 }
 canvas.addEventListener("pointermove", (e) => { if (e.pointerType === "mouse") showCard(hitAt(e), e.clientX, e.clientY); });
-canvas.addEventListener("pointerleave", () => { card.hidden = true; });
+canvas.addEventListener("pointerleave", () => showCard(undefined, 0, 0));
 canvas.addEventListener("click", (e) => {
   kiosk.tap(); applyKiosk();
   const h = hitAt(e);
