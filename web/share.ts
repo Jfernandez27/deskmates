@@ -5,7 +5,7 @@ export type LanInfo = { lan: boolean; port: number; primary: string | null; alte
 
 export const COPY = {
   off: "The office only listens on this machine. Start it with deskmates serve --lan to open it on a tablet or phone.",
-  noAddress: "No network address found. Connect to a network and restart deskmates.",
+  noAddress: "No network address found. Connect to a network and open this again.",
   hint: "Scan with the tablet. The link is a key: anyone who scans it sees your agents.",
   tooLong: "The link is too long for a QR. Copy it instead.",
   others: "Other addresses:",

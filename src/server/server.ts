@@ -57,8 +57,8 @@ export type Options = {
   relay?: RelayOptions;
   /** where the order of owners is kept; default $XDG_STATE_HOME|~/.local/state + /deskmates/shared.json */
   ownersFile?: string;
-  /** the addresses of this machine, ranked by the CLI for GET /v1/lan; the server never reads the interfaces itself */
-  addresses?: Addresses;
+  /** the addresses of this machine, ranked by the CLI and read on every GET /v1/lan, so a network that comes up later shows; the server never reads the interfaces itself */
+  addresses?: () => Addresses;
   /** transcript-based adapters to watch (Codex, Copilot, Cursor, Gemini…) */
   transcripts?: TranscriptAdapter[];
   transcriptIntervalMs?: number;
@@ -336,7 +336,7 @@ export async function startServer(opts: Options): Promise<Running> {
       }
       if (url === "/v1/lan") {
         if (req.method !== "GET") { res.writeHead(405, { allow: "GET" }).end(); return; }
-        const { primary, alternatives } = opts.addresses ?? { primary: null, alternatives: [] };
+        const { primary, alternatives } = opts.addresses?.() ?? { primary: null, alternatives: [] };
         // A page that rebinds its own name to 127.0.0.1 arrives from loopback but with a foreign Host: it gets no token.
         const hostName = (req.headers.host ?? "").replace(/:\d*$/, "").replace(/^\[(.*)\]$/, "$1").toLowerCase();
         const local = !isLoopback(req.socket.remoteAddress) || ["127.0.0.1", "localhost", "::1"].includes(hostName);

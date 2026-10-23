@@ -88,7 +88,7 @@ test("/v1/lan: on localhost without --lan, lan is false and the token is withhel
 test.skipIf(!lanIp)("/v1/lan with --lan: the token only to a client that already has it", async () => {
   const web = mkdtempSync(join(tmpdir(), "dm-web-"));
   writeFileSync(join(web, "index.html"), "office");
-  srv = await startServer({ port: 0, webDir: web, token: TOKEN, lan: true, addresses: { primary: "192.168.1.9", alternatives: ["10.0.0.5"] } });
+  srv = await startServer({ port: 0, webDir: web, token: TOKEN, lan: true, addresses: () => ({ primary: "192.168.1.9", alternatives: ["10.0.0.5"] }) });
   const base = `http://${lanIp}:${srv.port}`;
   expect((await fetch(`${base}/v1/lan`)).status).toBe(401);
   const ok = await fetch(`${base}/v1/lan`, { headers: { authorization: `Bearer ${TOKEN}` } });
@@ -96,10 +96,21 @@ test.skipIf(!lanIp)("/v1/lan with --lan: the token only to a client that already
   expect(ok.headers.get("cache-control")).toBe("no-store");
 });
 
+test("/v1/lan reads the addresses on every request: a network that comes up after serve shows without a restart", async () => {
+  const web = mkdtempSync(join(tmpdir(), "dm-web-"));
+  writeFileSync(join(web, "index.html"), "office");
+  let current: { primary: string | null; alternatives: string[] } = { primary: null, alternatives: [] };
+  srv = await startServer({ port: 0, webDir: web, token: TOKEN, lan: true, addresses: () => current });
+  const lan = async () => (await fetch(`http://127.0.0.1:${srv!.port}/v1/lan`)).json();
+  expect((await lan()).primary).toBeNull();
+  current = { primary: "192.168.1.96", alternatives: [] };
+  expect((await lan()).primary).toBe("192.168.1.96");
+});
+
 test("GET /v1/lan from loopback hands the token only to a local Host name (DNS rebinding)", async () => {
   const web = mkdtempSync(join(tmpdir(), "dm-web-"));
   writeFileSync(join(web, "index.html"), "office");
-  srv = await startServer({ port: 0, webDir: web, token: TOKEN, lan: true, addresses: { primary: "192.168.1.9", alternatives: [] } });
+  srv = await startServer({ port: 0, webDir: web, token: TOKEN, lan: true, addresses: () => ({ primary: "192.168.1.9", alternatives: [] }) });
   const port = srv.port;
   const lan = (host: string) => new Promise<any>((ok, bad) => {
     const r = request({ host: "127.0.0.1", port, path: "/v1/lan", headers: { host } }, (res) => {

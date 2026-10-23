@@ -6,7 +6,7 @@ export type BannerInput = { lan: boolean; port: number; token: string; addresses
 
 export const linkFor = (ip: string, port: number, token: string) => `http://${ip}:${port}/?token=${token}`;
 export const WARNING = "Anyone with that link sees your agents, folders and file names. Share it only on networks you trust.";
-export const NO_ADDRESS = "no network address found: connect to a network and restart";
+export const NO_ADDRESS = "no network address found: connect to a network and open the Share dialog";
 export const HINT_OFF = "to see it on a tablet or phone: deskmates serve --lan";
 const QR_ON = "\x1b[30;107m";
 const QR_OFF = "\x1b[0m";
