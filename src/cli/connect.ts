@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, existsSync, copyFileSync, renameSync, statSync, chmodSync, realpathSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, copyFileSync, renameSync, statSync, chmodSync, realpathSync, readdirSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 
 /** Claude Code hook events deskmates listens to. */
@@ -108,4 +108,23 @@ export function findProfiles(home: string, extra: (string | undefined)[] = []): 
   try { names = readdirSync(home).filter((n) => n.startsWith(".claude")); } catch { /* no home */ }
   const dirs = [...names.map((n) => join(home, n)), ...extra.filter((d): d is string => !!d)];
   return [...new Set(dirs.filter(isProfile))].sort();
+}
+
+/**
+ * Copies the hook script into `dir` (your deskmates config folder) and returns the copy's path. Settings point at the
+ * copy, not at the package: a global install under nvm lives in a folder named after the node version, which goes away.
+ */
+export function installHook(src: string, dir: string): string {
+  mkdirSync(dir, { recursive: true, mode: 0o700 });
+  const dest = join(dir, "deskmates-hook.sh");
+  const tmp = `${dest}.tmp`;
+  copyFileSync(src, tmp);
+  chmodSync(tmp, 0o755);
+  renameSync(tmp, dest);
+  return dest;
+}
+
+/** The copy is there and the same as the package's script. */
+export function hookIsCurrent(src: string, dest: string): boolean {
+  try { return readFileSync(src, "utf8") === readFileSync(dest, "utf8"); } catch { return false; }
 }

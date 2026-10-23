@@ -49,7 +49,7 @@ deskmates connect              # when you are ready: your Claude Code sessions w
 
 ## Requirements
 
-- Node.js 22.18 or newer (TypeScript runs natively, no build step for the CLI)
+- Node.js 22.18 or newer
 - `curl` (the hook uses it)
 - Claude Code
 
@@ -70,19 +70,21 @@ Run `npm link` once to call that clone as `deskmates`; after a `git pull`, `npm 
 ## Connect a Claude Code profile
 
 ```bash
-node bin/deskmates.ts connect                          # $CLAUDE_CONFIG_DIR, or ~/.claude
-node bin/deskmates.ts connect --profile ~/.claude-work # any other profile
-node bin/deskmates.ts connect --all                    # every ~/.claude* profile
-node bin/deskmates.ts doctor                           # checks curl, the hook, the service and each profile
+deskmates connect                          # $CLAUDE_CONFIG_DIR, or ~/.claude
+deskmates connect --profile ~/.claude-work # any other profile
+deskmates connect --all                    # every ~/.claude* profile
+deskmates doctor                           # checks curl, the hook, the service and each profile
 ```
 
 `connect` adds one hook per Claude Code event to `<profile>/settings.json`, each marked `"_deskmates": true` (an entry that runs only `deskmates-hook.sh` counts as ours even if Claude Code dropped the mark), after saving a timestamped backup next to it; a symlinked `settings.json` stays a link. Your existing hooks, plugins and settings are left exactly as they were. Run it again any time: it never duplicates entries.
 
 ```bash
-node bin/deskmates.ts disconnect --profile ~/.claude-work   # removes only what connect added
+deskmates disconnect --profile ~/.claude-work   # removes only what connect added
 ```
 
-The hook is a three-line shell script that posts the event to `127.0.0.1:47821` with a 50 ms ceiling and always exits 0. If deskmates is not running, your agents do not notice.
+From a clone without `npm link`, run these as `node bin/deskmates.ts …`.
+
+The hook is a three-line shell script, copied to `~/.config/deskmates/deskmates-hook.sh` so it survives node upgrades, that posts the event to `127.0.0.1:47821` with a 50 ms ceiling and always exits 0. If deskmates is not running, your agents do not notice.
 
 ## Themes
 
@@ -135,7 +137,7 @@ Put your own in `~/.config/deskmates/roles.toml`: roles there override or extend
 ## On your phone or another computer
 
 ```bash
-node bin/deskmates.ts serve --lan
+deskmates serve --lan
 ```
 
 prints a link like `http://192.168.1.20:47821/?token=…`. Open it once on the other device; a cookie keeps you in. Without `--lan` the office is reachable only from this machine. Hooks are always accepted only from this machine. Agents on other machines (a CI runner, a server) can post to the [ingest API](docs/ingest-api.md) at that address with the same token.

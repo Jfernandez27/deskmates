@@ -1,8 +1,8 @@
 import { test, expect } from "vitest";
-import { mkdtempSync, writeFileSync, readFileSync, readdirSync, existsSync, mkdirSync, renameSync, symlinkSync, lstatSync } from "node:fs";
+import { mkdtempSync, writeFileSync, readFileSync, readdirSync, existsSync, mkdirSync, renameSync, symlinkSync, lstatSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { connect, disconnect, findProfiles, HOOK_EVENTS, status } from "../../src/cli/connect.ts";
+import { connect, disconnect, findProfiles, HOOK_EVENTS, hookIsCurrent, installHook, status } from "../../src/cli/connect.ts";
 
 const HOOK = "/opt/deskmates/bin/deskmates-hook.sh";
 const existing = {
@@ -124,4 +124,19 @@ test("status: a hook path reached through a symlink (npm link, nvm) is not stale
   symlinkSync(pkg, linked);
   connect(p.dir, join(linked, "bin", "deskmates-hook.sh"));
   expect(status(p.dir, join(pkg, "bin", "deskmates-hook.sh"))).toMatchObject({ connected: true, stale: false });
+});
+
+test("installHook copies the hook to a folder that outlives node versions, executable, and refreshes it", () => {
+  const pkg = mkdtempSync(join(tmpdir(), "dm-pkg-"));
+  const src = join(pkg, "deskmates-hook.sh");
+  writeFileSync(src, "#!/bin/sh\nexit 0\n");
+  const conf = join(mkdtempSync(join(tmpdir(), "dm-conf-")), "deskmates");
+  const dest = installHook(src, conf);
+  expect(dest).toBe(join(conf, "deskmates-hook.sh"));
+  expect(statSync(dest).mode & 0o777).toBe(0o755);
+  expect(hookIsCurrent(src, dest)).toBe(true);
+  writeFileSync(src, "#!/bin/sh\n# newer\nexit 0\n");
+  expect(hookIsCurrent(src, dest)).toBe(false);
+  installHook(src, conf);
+  expect(readFileSync(dest, "utf8")).toContain("newer");
 });

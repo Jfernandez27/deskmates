@@ -14,7 +14,7 @@
 
 `deskmates connect` writes one entry per hook event into `<profile>/settings.json`, each marked `"_deskmates": true`, after saving `settings.json.bak-deskmates-<timestamp>` next to it. It never touches other hooks, plugins or settings, keeps the file's indentation, and is safe to run again.
 
-The hook is `bin/deskmates-hook.sh`: it posts the hook payload to `127.0.0.1:47821` with a 50 ms ceiling and always exits 0. Set `DESKMATES_PORT` in the agent's environment if you serve on another port.
+The hook is `bin/deskmates-hook.sh`, which `connect` copies to `~/.config/deskmates/deskmates-hook.sh` (a path that stays when node is upgraded or nvm switches versions) and points settings.json at: it posts the hook payload to `127.0.0.1:47821` with a 50 ms ceiling and always exits 0. Set `DESKMATES_PORT` in the agent's environment if you serve on another port.
 
 - **Several profiles.** Connect each one, or all of them with `deskmates connect --all` (every `~/.claude*` directory that holds a `settings.json` or `projects/`, plus `$CLAUDE_CONFIG_DIR`); `doctor` checks the same list. Characters show the profile name (`claude-work · designer`), so two profiles never mix.
 - **Named agents.** Sessions started with `claude --agent plugin:name` and subagents (`Explore`, `Plan`, your own) carry their name; [roles.md](roles.md) maps names to outfits.

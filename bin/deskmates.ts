@@ -4,7 +4,7 @@ import { homedir, networkInterfaces } from "node:os";
 import { join, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 import { startServer, DEFAULT_PORT } from "../src/server/server.ts";
-import { connect, disconnect, findProfiles, status } from "../src/cli/connect.ts";
+import { connect, disconnect, findProfiles, hookIsCurrent, installHook, status } from "../src/cli/connect.ts";
 import { loadRoles } from "../src/core/roles.ts";
 import { loadOrCreateToken, readRelayToken, TOKEN_FILE } from "../src/cli/token.ts";
 import { TRANSCRIPT_ADAPTERS } from "../src/adapters/index.ts";
@@ -20,6 +20,8 @@ import { defaultHistoryDir } from "../src/server/history-store.ts";
 
 const ROOT = packageRoot();
 const HOOK = join(ROOT, "bin", "deskmates-hook.sh");
+/** where settings.json points: a copy of HOOK that stays put when node (and the package with it) moves */
+const HOOK_COPY = join(configDir(), "deskmates-hook.sh");
 const WEB = join(ROOT, "dist", "web");
 
 const args = process.argv.slice(2);
@@ -67,8 +69,9 @@ async function main() {
       return;
     }
     case "connect": {
+      installHook(HOOK, configDir());
       for (const p of targetProfiles()) {
-        const backup = connect(p, HOOK);
+        const backup = connect(p, HOOK_COPY);
         console.log(backup ? `Connected ${p}. Backup: ${backup}` : `Connected ${p}.`);
       }
       if (port !== DEFAULT_PORT) console.log(`Note: the hook posts to port ${DEFAULT_PORT} unless DESKMATES_PORT is set in the agent's environment.`);
@@ -141,8 +144,9 @@ async function main() {
       try { execFileSync("curl", ["--version"], { stdio: "ignore" }); curl = true; } catch {}
       line(curl, curl ? "curl found" : "curl not found: the hook needs it");
       let exec = false;
-      try { accessSync(HOOK, constants.X_OK); exec = true; } catch {}
-      line(exec, `hook script ${exec ? "is executable" : "is missing or not executable"}: ${HOOK}`);
+      try { accessSync(HOOK_COPY, constants.X_OK); exec = true; } catch {}
+      if (!exec) line(false, `hook script is missing or not executable: ${HOOK_COPY} (run: deskmates connect)`);
+      else line(hookIsCurrent(HOOK, HOOK_COPY), hookIsCurrent(HOOK, HOOK_COPY) ? `hook script is executable: ${HOOK_COPY}` : `hook script ${HOOK_COPY} is older than this deskmates (run: deskmates connect)`);
       const rolesFile = join(configDir(), "roles.toml");
       if (existsSync(rolesFile)) {
         const problems: string[] = [];
@@ -180,7 +184,7 @@ async function main() {
       }
       for (const p of knownProfiles()) {
         let s;
-        try { s = status(p, HOOK); } catch (e) { line(false, `${p}: ${(e as Error).message}`); continue; }
+        try { s = status(p, HOOK_COPY); } catch (e) { line(false, `${p}: ${(e as Error).message}`); continue; }
         line(s.connected && !s.stale, `${p}: ${s.connected ? `${s.entries} hooks${s.stale ? ", pointing to an old path — run connect again" : ""}` : "not connected"}`);
       }
       process.exitCode = ok ? 0 : 1;
