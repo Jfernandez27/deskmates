@@ -8,7 +8,7 @@
 #   kind: start | tool | waiting | idle | end
 kind=$1 source=$2 session=$3 agent=${4:-} cwd=${5:-} tool=${6:-} detail=${7:-}
 url=${DESKMATES_URL:-}
-token=${DESKMATES_TOKEN:-$(cat "${DESKMATES_TOKEN_FILE:-$HOME/.config/deskmates/token}" 2>/dev/null)}
+token=${DESKMATES_TOKEN:-$(cat "${DESKMATES_TOKEN_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/deskmates/token}" 2>/dev/null)}
 [ -n "$url" ] && [ -n "$token" ] && [ -n "$kind" ] && [ -n "$source" ] && [ -n "$session" ] || exit 0
 esc() { printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g' | tr -d '\n\r' | cut -c1-200; }
 field() { [ -n "$2" ] && printf ',"%s":"%s"' "$1" "$(esc "$2")"; }

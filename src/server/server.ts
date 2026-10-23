@@ -1,7 +1,6 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { readFile, readdir, stat } from "node:fs/promises";
 import { join, resolve, extname, sep } from "node:path";
-import { homedir } from "node:os";
 import { WebSocketServer, WebSocket } from "ws";
 import type { AgentEvent, Character, OfficeState } from "../types/events.ts";
 import { reduce, tick, emptyState, keyOf } from "../core/reducer.ts";
@@ -12,7 +11,7 @@ import type { Addresses } from "./lan-address.ts";
 import { Dedup } from "./state.ts";
 import { checkToken, parseBody, IngestError, RateLimits } from "./ingest.ts";
 import { TranscriptWatcher, type TranscriptAdapter } from "../adapters/transcript.ts";
-import { packageRoot } from "../root.ts";
+import { packageRoot, configDir } from "../root.ts";
 import { floorNumbersOf, type FloorNumbers } from "./theme-floor.ts";
 import { ancestorPids, defaultLister, defaultReader, findToolPid, parsePidHeader, TOOL_PROCESSES, type PpidReader, type ProcLister } from "./pids.ts";
 import { applyEvent, emptyDay, isValidDate, localDate, roll, viewOf, type Day } from "../core/history.ts";
@@ -163,9 +162,9 @@ export async function startServer(opts: Options): Promise<Running> {
     if (origin === undefined) return true;
     try { return new URL(origin).host === req.headers.host; } catch { return false; }
   };
-  const roles: Role[] = loadRoles(opts.rolesFile ?? join(homedir(), ".config", "deskmates", "roles.toml"));
+  const roles: Role[] = loadRoles(opts.rolesFile ?? join(configDir(), "roles.toml"));
   const assetsDir = opts.assetsDir ?? join(packageRoot(), "assets");
-  const themesDir = opts.themesDir ?? join(homedir(), ".config", "deskmates", "themes");
+  const themesDir = opts.themesDir ?? join(configDir(), "themes");
   const bundledIndex = async () => JSON.parse(await readFile(join(assetsDir, "themes", "index.json"), "utf8")) as { default: string; themes: string[] };
   const usage = new UsageTracker();
   const dedup = new Dedup();
@@ -331,7 +330,7 @@ export async function startServer(opts: Options): Promise<Running> {
         const m = /^\/v1\/characters\/([^/]+)\.png$/.exec(url);
         if (!m || !CHARACTER_NAME.test(m[1])) { res.writeHead(404).end(); return; }
         let png: Buffer;
-        try { png = await readFile(join(opts.charactersDir ?? join(homedir(), ".config", "deskmates", "characters"), `${m[1]}.png`)); } catch { res.writeHead(404).end(); return; }
+        try { png = await readFile(join(opts.charactersDir ?? join(configDir(), "characters"), `${m[1]}.png`)); } catch { res.writeHead(404).end(); return; }
         if (!isCharacterSheet(png)) { res.writeHead(422, { "content-type": "text/plain" }).end("deskmates: a character sheet is a 112x96 PNG (7 frames of 16x32 in 3 rows)"); return; }
         res.writeHead(200, { "content-type": "image/png", "cache-control": "no-cache" }).end(png);
         return;

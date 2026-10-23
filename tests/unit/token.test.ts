@@ -26,3 +26,11 @@ test("relay token: flag, env, file, nothing", () => {
   writeFileSync(f, "filetoken\n");
   expect(readRelayToken(undefined, {}, f)).toBe("filetoken");
 });
+
+test("configDir follows an absolute XDG_CONFIG_HOME, else ~/.config, for every file deskmates reads", async () => {
+  const { configDir } = await import("../../src/root.ts");
+  const { homedir } = await import("node:os");
+  expect(configDir({ XDG_CONFIG_HOME: "/x/conf" })).toBe("/x/conf/deskmates");
+  expect(configDir({ XDG_CONFIG_HOME: "relative" })).toBe(`${homedir()}/.config/deskmates`);
+  expect(configDir({})).toBe(`${homedir()}/.config/deskmates`);
+});
