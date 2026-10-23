@@ -155,3 +155,11 @@ describe("history persistence", () => {
     expect(one(loadDay(where, "2026-10-14")!).workingMs).toBe(3 * MIN);
   });
 });
+
+test("events replayed after a restart (a transcript read again from the start) count nothing twice and leave the phase alone", () => {
+  const events = [ev("start", T(10)), ev("tool", T(10, 1), { tool: "Read" }), ev("tool", T(10, 2), { tool: "Edit" }), ev("idle", T(10, 3))];
+  const once = run(events);
+  const twice = run(events, once);
+  expect(twice).toEqual(once);
+  expect(one(twice).tools).toBe(2);
+});

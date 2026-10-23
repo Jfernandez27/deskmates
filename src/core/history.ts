@@ -92,6 +92,8 @@ export function applyEvent(day: Day, e: AgentEvent): Day {
     };
   } else if (s.phase === "ended" && e.kind !== "start" && e.kind !== "usage") {
     return day;
+  } else if (t < s.at && e.kind !== "usage") {
+    return day; // already counted: a transcript read again from its start after a restart (usage carries totals, so it may)
   }
   s = advance(s, t);
   s = {
