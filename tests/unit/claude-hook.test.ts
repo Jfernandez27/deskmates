@@ -50,6 +50,14 @@ test("permission requests and notifications mean waiting", () => {
   expect(fromHook({ ...base, hook_event_name: "Notification" }, NOW)[0].kind).toBe("waiting");
 });
 
+test("only notifications that ask for an answer mean waiting; an agent idle at its prompt stays done", () => {
+  const base = { session_id: "s", transcript_path: "/h/.claude/projects/p/s.jsonl", cwd: "/p", hook_event_name: "Notification" };
+  expect(fromHook({ ...base, notification_type: "permission_prompt" }, NOW)[0].kind).toBe("waiting");
+  expect(fromHook({ ...base, notification_type: "elicitation_dialog" }, NOW)[0].kind).toBe("waiting");
+  expect(fromHook({ ...base, notification_type: "idle_prompt", message: "Claude is waiting for your input" }, NOW)).toEqual([]);
+  expect(fromHook({ ...base, notification_type: "auth_success" }, NOW)).toEqual([]);
+});
+
 test("never leaks prompts or tool contents, and details are short", () => {
   const secret = "SECRET-" + "x".repeat(300);
   const base = { session_id: "s", transcript_path: "/h/.claude/projects/p/s.jsonl", cwd: "/p" };

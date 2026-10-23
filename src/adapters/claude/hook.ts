@@ -26,6 +26,9 @@ const KIND: Record<string, EventKind> = {
   SubagentStop: "end",
 };
 
+/** Notifications that ask nothing of the user: `idle_prompt` comes a minute after Stop, while the agent sits done at its prompt. Any other type (or none, from older Claude Code) means waiting. */
+const NOT_WAITING = new Set(["idle_prompt", "auth_success"]);
+
 /** Translates one Claude Code hook payload into normalized events. `now` stamps them: hooks carry no time. */
 export function fromHook(payload: unknown, now: string): AgentEvent[] {
   if (!payload || typeof payload !== "object") return [];
@@ -33,6 +36,7 @@ export function fromHook(payload: unknown, now: string): AgentEvent[] {
   const name = str(p.hook_event_name);
   const sessionId = str(p.session_id);
   if (!name || !sessionId || !(name in KIND)) return [];
+  if (name === "Notification" && NOT_WAITING.has(str(p.notification_type) ?? "")) return [];
 
   const agentId = str(p.agent_id);
   const agentType = str(p.agent_type);
