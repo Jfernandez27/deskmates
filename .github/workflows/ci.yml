@@ -49,6 +49,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm pack
+      - name: The CLI is executable inside the tarball (npm update does not set it again)
+        run: tar -tvzf deskmates-*.tgz | grep ' package/dist/cli/deskmates.js$' | grep -q '^-rwx'
       - name: Install the tarball and run it
         run: |
           prefix="$RUNNER_TEMP/global"
