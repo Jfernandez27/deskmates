@@ -5,6 +5,7 @@ import { join, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 import { startServer, DEFAULT_PORT } from "../src/server/server.ts";
 import { connect, disconnect, findProfiles, status } from "../src/cli/connect.ts";
+import { loadRoles } from "../src/core/roles.ts";
 import { loadOrCreateToken, readRelayToken, TOKEN_FILE } from "../src/cli/token.ts";
 import { TRANSCRIPT_ADAPTERS } from "../src/adapters/index.ts";
 import { cast, eventsAt, endAll, normalize, DEFAULTS, TICK_MS } from "../src/cli/demo.ts";
@@ -142,6 +143,12 @@ async function main() {
       let exec = false;
       try { accessSync(HOOK, constants.X_OK); exec = true; } catch {}
       line(exec, `hook script ${exec ? "is executable" : "is missing or not executable"}: ${HOOK}`);
+      const rolesFile = join(homedir(), ".config", "deskmates", "roles.toml");
+      if (existsSync(rolesFile)) {
+        const problems: string[] = [];
+        loadRoles(rolesFile, (m) => problems.push(m));
+        line(!problems.length, problems[0] ?? `${rolesFile} is valid`);
+      }
       try {
         const h = await (await fetch(`http://127.0.0.1:${port}/healthz`, { signal: AbortSignal.timeout(1000) })).json() as any;
         line(true, `service up on port ${port}, ${h.characters} character(s)`);
