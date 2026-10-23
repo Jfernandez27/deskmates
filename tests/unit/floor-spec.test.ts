@@ -32,3 +32,10 @@ test("an island bigger than the floor is the whole floor", () => {
   expect(checkFloorSpec({ ...ok, islandSize: 6 }).islandSize).toBe(2);
   expect(checkFloorSpec({ ...ok, islandSize: 2 }).islandSize).toBe(2);
 });
+
+test("two meeting seats on one tile, or one on a desk seat, are refused: two agents would stand on one spot", () => {
+  const ok = { cols: 48, rows: 28, seats: [{ c: 3, r: 5 }], door: { c: 23, r: 27 }, doorGap: [23, 24], meeting: [{ c: 40, r: 12, face: "up" }] };
+  expect(() => checkFloorSpec({ ...ok, meeting: [{ c: 40, r: 12, face: "up" }, { c: 40, r: 12, face: "left" }] })).toThrow(/floor\.meeting\[1\]/);
+  expect(() => checkFloorSpec({ ...ok, meeting: [{ c: 3, r: 5, face: "up" }] })).toThrow(/floor\.meeting\[0\]/);
+  expect(checkFloorSpec({ ...ok, meeting: [{ c: 40, r: 12, face: "up" }, { c: 41, r: 12, face: "up" }] }).meeting).toHaveLength(2);
+});

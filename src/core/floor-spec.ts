@@ -48,6 +48,8 @@ export function checkFloorSpec(f: unknown): FloorSpec {
   if (!Array.isArray(s.meeting)) bad("meeting", "must be a list");
   for (const [i, m] of (s.meeting as any[]).entries()) {
     if (!tile(m, cols, rows) || !["left", "right", "up"].includes(m.face)) bad(`meeting[${i}]`, "must be a tile of the floor facing left, right or up");
+    const same = (o: { c: number; r: number }) => o.c === m.c && o.r === m.r;
+    if ((s.meeting as any[]).slice(0, i).some(same) || s.seats.some(same)) bad(`meeting[${i}]`, "shares its tile with another meeting seat or a desk seat");
   }
   // an island never holds more desks than the floor has
   return { cols, rows, islandSize: Math.min(islandSize, s.seats.length), seats: s.seats, door: s.door, doorGap: gap, meeting: s.meeting };
