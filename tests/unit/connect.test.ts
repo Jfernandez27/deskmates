@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { mkdtempSync, writeFileSync, readFileSync, readdirSync, existsSync } from "node:fs";
+import { mkdtempSync, writeFileSync, readFileSync, readdirSync, existsSync, renameSync, symlinkSync, lstatSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { connect, disconnect, HOOK_EVENTS, status } from "../../src/cli/connect.ts";
@@ -73,4 +73,31 @@ test("status reports a stale hook path", () => {
   const p = profile();
   connect(p.dir, HOOK);
   expect(status(p.dir, "/new/path/deskmates-hook.sh")).toMatchObject({ connected: true, stale: true });
+});
+
+test("entries that lost their mark (Claude Code rewrote settings.json) are still ours: no duplicates, and disconnect removes them", () => {
+  const unmarked = { matcher: ".*", hooks: [{ type: "command", command: "'/old/node/lib/node_modules/deskmates/bin/deskmates-hook.sh'" }] };
+  const hooks: Record<string, unknown[]> = { ...existing.hooks };
+  for (const ev of HOOK_EVENTS) hooks[ev] = [...(hooks[ev] ?? []), unmarked];
+  const p = profile({ ...existing, hooks });
+  expect(status(p.dir, HOOK)).toMatchObject({ connected: true, entries: HOOK_EVENTS.length, stale: true });
+  connect(p.dir, HOOK);
+  const after = JSON.parse(readFileSync(p.file, "utf8"));
+  for (const ev of HOOK_EVENTS) expect(after.hooks[ev].filter((h: any) => JSON.stringify(h).includes("deskmates-hook.sh"))).toHaveLength(1);
+  expect(disconnect(p.dir)).toBe(true);
+  expect(JSON.parse(readFileSync(p.file, "utf8"))).toEqual(existing);
+});
+
+test("a settings.json that is a symlink (stow, home-manager) stays a symlink; its target is edited and backed up", () => {
+  const p = profile();
+  const real = join(mkdtempSync(join(tmpdir(), "dm-dotfiles-")), "settings.json");
+  renameSync(p.file, real);
+  symlinkSync(real, p.file);
+  const backup = connect(p.dir, HOOK);
+  expect(lstatSync(p.file).isSymbolicLink()).toBe(true);
+  expect(ours(JSON.parse(readFileSync(real, "utf8")))).toHaveLength(HOOK_EVENTS.length);
+  expect(backup && readFileSync(backup, "utf8")).toBe(p.text);
+  expect(disconnect(p.dir)).toBe(true);
+  expect(lstatSync(p.file).isSymbolicLink()).toBe(true);
+  expect(readFileSync(real, "utf8")).toBe(p.text);
 });
