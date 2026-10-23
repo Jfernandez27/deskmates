@@ -1,9 +1,10 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync, chmodSync } from "node:fs";
 import { randomBytes } from "node:crypto";
-import { homedir, hostname, userInfo } from "node:os";
+import { hostname, userInfo } from "node:os";
 import { dirname, join } from "node:path";
+import { configDir } from "../root.ts";
 
-export const MACHINE_ID_FILE = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), ".config"), "deskmates", "machine-id");
+export const MACHINE_ID_FILE = join(configDir(), "machine-id");
 
 const ID_RE = /^[a-z0-9]{8}$/;
 

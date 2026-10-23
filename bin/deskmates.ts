@@ -12,7 +12,7 @@ import { cast, eventsAt, endAll, normalize, DEFAULTS, TICK_MS } from "../src/cli
 import type { AgentEvent } from "../src/types/events.ts";
 import { runMcp } from "../src/cli/mcp.ts";
 import { glob } from "node:fs/promises";
-import { packageRoot } from "../src/root.ts";
+import { packageRoot, configDir } from "../src/root.ts";
 import { rankAddresses } from "../src/server/lan-address.ts";
 import { lanBanner } from "../src/cli/lan-banner.ts";
 import { loadOrCreateMachineId, displayName, hostName } from "../src/cli/machine.ts";
@@ -143,7 +143,7 @@ async function main() {
       let exec = false;
       try { accessSync(HOOK, constants.X_OK); exec = true; } catch {}
       line(exec, `hook script ${exec ? "is executable" : "is missing or not executable"}: ${HOOK}`);
-      const rolesFile = join(homedir(), ".config", "deskmates", "roles.toml");
+      const rolesFile = join(configDir(), "roles.toml");
       if (existsSync(rolesFile)) {
         const problems: string[] = [];
         loadRoles(rolesFile, (m) => problems.push(m));

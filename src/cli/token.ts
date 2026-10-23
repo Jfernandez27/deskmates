@@ -1,9 +1,9 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync, chmodSync } from "node:fs";
 import { randomBytes } from "node:crypto";
-import { homedir } from "node:os";
 import { dirname, join } from "node:path";
+import { configDir } from "../root.ts";
 
-export const TOKEN_FILE = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), ".config"), "deskmates", "token");
+export const TOKEN_FILE = join(configDir(), "token");
 
 /** The ingest API token, created on first use with owner-only permissions. */
 export function loadOrCreateToken(file = TOKEN_FILE): string {
@@ -18,7 +18,7 @@ export function loadOrCreateToken(file = TOKEN_FILE): string {
   return t;
 }
 
-export const RELAY_TOKEN_FILE = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), ".config"), "deskmates", "relay-token");
+export const RELAY_TOKEN_FILE = join(configDir(), "relay-token");
 
 /** The token of the shared office this machine relays to: flag, then DESKMATES_RELAY_TOKEN, then the relay-token file. */
 export function readRelayToken(flag: string | undefined, env: NodeJS.ProcessEnv = process.env, file = RELAY_TOKEN_FILE): string | undefined {

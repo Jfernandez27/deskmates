@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -11,4 +12,10 @@ export function packageRoot(): string {
     dir = up;
   }
   return dir;
+}
+
+/** Where your deskmates files live (token, roles.toml, themes, characters): $XDG_CONFIG_HOME/deskmates, or ~/.config/deskmates. */
+export function configDir(env: NodeJS.ProcessEnv = process.env): string {
+  const base = env.XDG_CONFIG_HOME?.startsWith("/") ? env.XDG_CONFIG_HOME : join(homedir(), ".config");
+  return join(base, "deskmates");
 }
