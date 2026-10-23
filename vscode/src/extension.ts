@@ -14,9 +14,18 @@ async function focusTerminal(m: FocusMessage) {
 /** Opens the office served by `deskmates serve` in a webview panel. All logic lives in the service. */
 export function activate(context: vscode.ExtensionContext) {
   let panel: vscode.WebviewPanel | undefined;
+  /** whether the panel shows the office; a "not running" panel checks again each time the command is run */
+  let showsOffice = false;
 
   context.subscriptions.push(vscode.commands.registerCommand("deskmates.open", async () => {
-    if (panel) { panel.reveal(); return; }
+    if (panel) { panel.reveal(); if (!showsOffice) await render(panel); return; }
+    panel = vscode.window.createWebviewPanel("deskmates", "deskmates", vscode.ViewColumn.Beside, { enableScripts: true, retainContextWhenHidden: true });
+    panel.onDidDispose(() => { panel = undefined; showsOffice = false; }, null, context.subscriptions);
+    panel.webview.onDidReceiveMessage((raw) => { const m = parseFocusMessage(raw); if (m) void focusTerminal(m); }, null, context.subscriptions);
+    await render(panel);
+  }));
+
+  async function render(panel: vscode.WebviewPanel) {
     const port = vscode.workspace.getConfiguration("deskmates").get<number>("port", 47821);
     const local = vscode.Uri.parse(`http://127.0.0.1:${port}/`);
     // works in remote and Codespaces windows too: VS Code forwards the port
@@ -25,9 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
     let up = false;
     try { up = (await fetch(new URL("/healthz", url), { signal: AbortSignal.timeout(1500) })).ok; } catch { up = false; }
 
-    panel = vscode.window.createWebviewPanel("deskmates", "deskmates", vscode.ViewColumn.Beside, { enableScripts: true, retainContextWhenHidden: true });
-    panel.onDidDispose(() => { panel = undefined; }, null, context.subscriptions);
-    panel.webview.onDidReceiveMessage((raw) => { const m = parseFocusMessage(raw); if (m) void focusTerminal(m); }, null, context.subscriptions);
+    showsOffice = up;
     const origin = new URL(url).origin;
     const nonce = randomBytes(16).toString("base64");
     // relays clicks from the office iframe to the extension: only from that iframe and its origin, only well-formed messages
@@ -49,7 +56,7 @@ window.addEventListener("message", (e) => {
       : `<!doctype html><html><body style="font-family:var(--vscode-font-family);color:var(--vscode-foreground);padding:24px">
 <h3>deskmates is not running</h3><p>Start it in a terminal, then run <b>deskmates: Open office</b> again:</p>
 <pre>deskmates serve</pre><p>Port: ${port} (setting <code>deskmates.port</code>).</p></body></html>`;
-  }));
+  }
 }
 
 export function deactivate() {}
