@@ -318,3 +318,10 @@ test("the page's files never leave the web folder, however the path is spelled",
     expect(r.body, path).not.toContain("outside");
   }
 });
+
+test("a port already in use rejects startServer with EADDRINUSE instead of crashing the process", async () => {
+  const url = await boot();
+  const port = Number(new URL(url).port);
+  const web = mkdtempSync(join(tmpdir(), "dm-web-"));
+  await expect(startServer({ port, webDir: web })).rejects.toMatchObject({ code: "EADDRINUSE" });
+});
