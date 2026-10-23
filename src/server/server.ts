@@ -188,7 +188,9 @@ export async function startServer(opts: Options): Promise<Running> {
   const rollDay = (now: number) => {
     const r = roll(day, now);
     if (!r.closed) return;
-    day = r.day;
+    // the new day may have a file already (a clock that jumped, a restart): keep what it holds, add the sessions carried over
+    const stored = opts.historyDir ? loadDay(opts.historyDir, r.day.date) : undefined;
+    day = stored ? { ...stored, sessions: { ...r.day.sessions, ...stored.sessions } } : r.day;
     saver?.saveNow(r.closed);
     saver?.schedule(day);
   };

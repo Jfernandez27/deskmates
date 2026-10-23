@@ -369,3 +369,23 @@ test("the hook endpoint takes only JSON (a web page cannot post it without a pre
   expect(big.status).toBe(204);
   expect(Object.keys(srv!.state().characters)).toHaveLength(1);
 });
+
+test("rolling into a day that already has a history file adds to it instead of writing over it", async () => {
+  const { saveDay } = await import("../../src/server/history-store.ts");
+  const { applyEvent, emptyDay } = await import("../../src/core/history.ts");
+  const dir = mkdtempSync(join(tmpdir(), "dm-hist-"));
+  const earlier = new Date(2026, 9, 15, 9, 0).toISOString();
+  saveDay(dir, applyEvent(emptyDay("2026-10-15"), { source: "codex", session: "b", kind: "tool", tool: "Edit", ts: earlier, transport: "transcript" }));
+  vi.useFakeTimers({ toFake: ["Date"] });
+  try {
+    vi.setSystemTime(new Date(2026, 9, 14, 23, 59));
+    const web = mkdtempSync(join(tmpdir(), "dm-web-"));
+    srv = await startServer({ port: 0, webDir: web, historyDir: dir });
+    const url = `http://127.0.0.1:${srv.port}`;
+    await post(url, JSON.stringify({ session_id: "a", transcript_path: "/h/.claude/projects/p/a.jsonl", cwd: "/p", hook_event_name: "UserPromptSubmit" }));
+    vi.setSystemTime(new Date(2026, 9, 15, 0, 0, 30));
+    const h = await (await fetch(`${url}/v1/history`)).json();
+    expect(h.date).toBe("2026-10-15");
+    expect(h.sessions.map((s: any) => s.key.split("/").pop()).sort()).toEqual(["a", "b"]);
+  } finally { vi.useRealTimers(); }
+});
