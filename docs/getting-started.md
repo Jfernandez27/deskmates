@@ -56,27 +56,46 @@ Codex, Copilot CLI, Cursor and Gemini CLI need no setup: `deskmates serve` follo
 
 ## Keep it running
 
-`deskmates serve` runs in the foreground. To start it with your session on Linux, a user service works well:
+`deskmates serve` runs in the foreground. To start it with your session, run it as a user service. A service does not load your shell's PATH, so nvm's node is not found by name: the unit calls node and the CLI by their full paths. Write it from a shell where `deskmates` works:
 
-```ini
-# ~/.config/systemd/user/deskmates.service
+**Linux (systemd):**
+
+```bash
+mkdir -p ~/.config/systemd/user
+cat > ~/.config/systemd/user/deskmates.service <<UNIT
 [Unit]
 Description=deskmates office
 
 [Service]
-ExecStart=%h/.local/bin/deskmates serve
+ExecStart=$(node -p process.execPath) $(npm root -g)/deskmates/dist/cli/deskmates.js serve
 Restart=on-failure
 
 [Install]
 WantedBy=default.target
-```
-
-```bash
+UNIT
 systemctl --user daemon-reload
 systemctl --user enable --now deskmates
 ```
 
-Adjust `ExecStart` to where `deskmates` lives (`command -v deskmates`). Add `--lan` to see it from other devices.
+**macOS (launchd):**
+
+```bash
+cat > ~/Library/LaunchAgents/dev.deskmates.plist <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Label</key><string>dev.deskmates</string>
+  <key>ProgramArguments</key><array>
+    <string>$(node -p process.execPath)</string><string>$(npm root -g)/deskmates/dist/cli/deskmates.js</string><string>serve</string>
+  </array>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+</dict></plist>
+PLIST
+launchctl load ~/Library/LaunchAgents/dev.deskmates.plist
+```
+
+Add `--lan` after `serve` to see it from other devices. **After you upgrade node or switch versions with nvm**, install deskmates under the new node (`npm install -g deskmates`), write the unit again and restart it (`systemctl --user daemon-reload && systemctl --user restart deskmates`, or `launchctl unload` then `load`). The Claude Code hooks need nothing: they run a copy of the hook kept in `~/.config/deskmates/`. The service may start before the network is up; the Share dialog finds the network address whenever it is opened.
 
 ## The page
 

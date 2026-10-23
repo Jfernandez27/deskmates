@@ -14,7 +14,7 @@ One deskmates on a machine in your network (the lab) shows everyone's agents. Ea
 git clone https://github.com/Jfernandez27/deskmates.git && cd deskmates
 npm install
 npm run build
-node bin/deskmates.ts serve --lan --shared
+node bin/deskmates.ts serve --lan --shared   # or, installed from npm: deskmates serve --lan --shared
 ```
 
 `--shared` implies `--no-transcripts`: the lab has no agents of its own to follow.
