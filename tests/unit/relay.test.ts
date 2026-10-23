@@ -179,3 +179,33 @@ test("a 429 puts the batch back and pauses the relay for a minute, then sends it
     expect(r.dropped).toBe(0);
   } finally { vi.useRealTimers(); }
 });
+
+test("when the lab answers again after a failure, it gets every character as it is now, at the time of its last event", async () => {
+  let up = false;
+  const sent: any[][] = [];
+  const f = vi.fn(async (_u: string, init: any) => {
+    if (!up) throw new Error("ECONNREFUSED");
+    sent.push(JSON.parse(init.body));
+    return new Response("{}", { status: 202 });
+  });
+  const at = new Date(Date.now() - 5 * 60_000).toISOString();
+  let state = emptyState();
+  for (const e of [ev({ session: "idle-one", ts: at, cwd: "/p", agent: "Explore" }), ev({ session: "idle-one", kind: "idle", ts: at }),
+    ev({ session: "busy", ts: at }), ev({ session: "busy", kind: "tool", tool: "Bash", detail: "npm test", ts: at })]) state = reduce(state, e);
+  const r = new Relay({ url: "http://lab", token: "t", owner: "a", ownerName: "A", ownerHost: "h", fetch: f as any, log: () => {} }, () => state);
+  r.push(ev({ session: "busy", kind: "tool", ts: at })); await r.flush();
+  expect(r.dropped).toBe(1);
+  up = true;
+  r.push(ev({ session: "other", kind: "tool", tool: "Read" })); await r.flush();
+  const all = sent.flat();
+  expect(all[0]).toMatchObject({ session: "other" });
+  const resync = all.slice(1).map((e) => `${e.session}:${e.kind}`);
+  expect(resync).toEqual(["idle-one:start", "idle-one:idle", "busy:start", "busy:tool"]);
+  expect(all.slice(1).every((e) => e.ts === at && e.owner === "a")).toBe(true);
+  expect(all.find((e) => e.session === "idle-one" && e.kind === "start")).toMatchObject({ cwd: "/p", agent: "Explore" });
+  expect(all.find((e) => e.session === "busy" && e.kind === "tool")).toMatchObject({ tool: "Bash", detail: "npm test" });
+  // and only once: the next batch is just what happened
+  sent.length = 0;
+  r.push(ev({ session: "other", kind: "idle" })); await r.flush();
+  expect(sent.flat().map((e) => e.session)).toEqual(["other"]);
+});
