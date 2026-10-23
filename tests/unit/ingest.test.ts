@@ -103,3 +103,12 @@ test("rate limits are per bucket", () => {
   expect(r.take("b", 600, 0)).toBe(true);
   expect(r.take("a", 1, 60_000)).toBe(true);
 });
+
+test("a sender that says what time it is gets its timestamps moved onto our clock (a lab PC whose clock is behind)", () => {
+  const now = new Date("2026-10-14T12:00:00Z");
+  const behind = now.getTime() - 12 * 60_000;
+  const [e] = parseBody({ source: "a", session: "1", kind: "tool", ts: new Date(behind - 5_000).toISOString() }, now, behind);
+  expect(e.ts).toBe(new Date(now.getTime() - 5_000).toISOString());
+  const [same] = parseBody({ source: "a", session: "1", kind: "tool", ts: "2026-10-14T11:59:00Z" }, now, now.getTime() - 500);
+  expect(same.ts).toBe("2026-10-14T11:59:00.000Z");
+});

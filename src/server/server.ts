@@ -299,7 +299,7 @@ export async function startServer(opts: Options): Promise<Running> {
         try { payload = JSON.parse(body.toString("utf8")); } catch { res.writeHead(400).end("invalid JSON"); return; }
         const named = hookName(req.headers["x-deskmates-name"]);
         // DESKMATES_NAME names the session it was set for; its subagents share the hook and the environment, not the name
-        const events = fromHook(payload, new Date().toISOString()).map((e) => (named && !e.parent ? { ...e, name: named } : e));
+        const events = fromHook(payload, hookTime()).map((e) => (named && !e.parent ? { ...e, name: named } : e));
         lastEvent = { at: new Date().toISOString(), source: events[0]?.source, profile: events[0]?.profile, decoded: events.length > 0 };
         apply(events);
         if (events[0]) trackPids(keyOf(events[0]), parsePidHeader(req.headers["x-deskmates-ppid"]));
@@ -316,7 +316,8 @@ export async function startServer(opts: Options): Promise<Running> {
         try {
           let parsed: unknown;
           try { parsed = JSON.parse(body.toString("utf8")); } catch { throw new IngestError(400, "invalid JSON"); }
-          const events = parseBody(parsed);
+          const clock = Number(req.headers["x-deskmates-clock"]);
+          const events = parseBody(parsed, new Date(), req.headers["x-deskmates-clock"] ? clock : undefined);
           if (events.some((e) => e.owner !== events[0].owner)) throw new IngestError(400, "events must share one owner");
           if (!rate.take(events[0].owner ?? "token", events.length)) throw new IngestError(429, "rate limit: 600 events per minute");
           lastEvent = { at: new Date().toISOString(), source: events[0].source, profile: events[0].profile, decoded: true };
@@ -402,6 +403,9 @@ export async function startServer(opts: Options): Promise<Running> {
   });
 
   const rate = new RateLimits();
+  /** hooks carry no time: they are stamped on arrival, by a clock that never steps back, or the reducer would ignore them as old */
+  let hookClock = 0;
+  const hookTime = () => { hookClock = Math.max(Date.now(), hookClock); return new Date(hookClock).toISOString(); };
   const watcher = opts.transcripts?.length
     ? new TranscriptWatcher(opts.transcripts, (events) => apply(events), { intervalMs: opts.transcriptIntervalMs })
     : undefined;

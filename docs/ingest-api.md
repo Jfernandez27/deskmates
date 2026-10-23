@@ -36,6 +36,8 @@ Responses: `202 {"accepted": n}`; `400 {"error": "events[i].field …"}` naming 
 | `tokens` | | with `usage`: cumulative `{input, output, cacheRead?, cacheWrite?}` |
 | `ts` | | ISO 8601; defaults to now, times in the future are clamped to now |
 
+An optional `x-deskmates-clock` header gives the sender's own time in milliseconds since 1970 when it sent the request; when it differs from the office's clock by more than 2 s, every `ts` in the request is moved by that difference (the relay sends it, so a PC whose clock is off does not fall asleep on a shared office).
+
 The 600 events per minute limit counts per owner on a shared office, so one busy PC does not use up the others' share. A request must carry a single `owner`.
 
 Silence rules apply: no event for 10 minutes and the character falls asleep; 30 minutes and it leaves. Send `end` when the session finishes.

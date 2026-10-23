@@ -20,7 +20,7 @@ export function checkToken(header: string | undefined, token: string): boolean {
 }
 
 /** Validates one event from the public API. Throws IngestError naming the field that failed. */
-export function validate(raw: unknown, i: number, now: Date): AgentEvent {
+export function validate(raw: unknown, i: number, now: Date, skewMs = 0): AgentEvent {
   const at = (f: string) => `events[${i}].${f}`;
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new IngestError(400, `events[${i}] must be an object`);
   const r = raw as Record<string, unknown>;
@@ -43,7 +43,7 @@ export function validate(raw: unknown, i: number, now: Date): AgentEvent {
     ev.ownerHost = r.ownerHost;
   }
   if (r.ts !== undefined) {
-    const t = typeof r.ts === "string" ? Date.parse(r.ts) : NaN;
+    const t = (typeof r.ts === "string" ? Date.parse(r.ts) : NaN) + skewMs;
     if (Number.isNaN(t)) throw new IngestError(400, `${at("ts")} must be an ISO 8601 date`);
     ev.ts = new Date(Math.min(t, now.getTime())).toISOString(); // a clock ahead of ours must not freeze the character
   }
@@ -57,11 +57,20 @@ export function validate(raw: unknown, i: number, now: Date): AgentEvent {
   return ev;
 }
 
-export function parseBody(body: unknown, now = new Date()): AgentEvent[] {
+/** Clocks closer than this are taken as they are. */
+const SKEW_TOLERANCE_MS = 2_000;
+
+/**
+ * `senderClock` is the sender's own time when it sent the request (header x-deskmates-clock, set by the relay):
+ * timestamps are moved by the difference, so a PC whose clock is minutes off does not fall asleep or walk out on the lab.
+ */
+export function parseBody(body: unknown, now = new Date(), senderClock?: number): AgentEvent[] {
+  const skew = senderClock !== undefined && Number.isFinite(senderClock) ? now.getTime() - senderClock : 0;
+  const skewMs = Math.abs(skew) > SKEW_TOLERANCE_MS ? skew : 0;
   const list = Array.isArray(body) ? body : [body];
   if (list.length === 0) throw new IngestError(400, "no events");
   if (list.length > MAX_EVENTS_PER_REQUEST) throw new IngestError(413, `at most ${MAX_EVENTS_PER_REQUEST} events per request`);
-  return list.map((e, i) => validate(e, i, now));
+  return list.map((e, i) => validate(e, i, now, skewMs));
 }
 
 /** Fixed one-minute window per token. */

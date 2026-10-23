@@ -220,3 +220,13 @@ test("close still sends its ends while a 429 pause holds the relay", async () =>
   await r.close(reduce(emptyState(), ev({ session: "x" })));
   expect(calls.at(-1).map((e: any) => `${e.session}:${e.kind}`)).toEqual(["x:end", "x:start"]);
 });
+
+test("every batch says what time it is on this PC, so the lab can correct for a clock that is off", async () => {
+  const f = vi.fn(async () => new Response("{}", { status: 202 }));
+  const r = new Relay({ url: "http://lab", token: "t", owner: "a", ownerName: "A", ownerHost: "h", fetch: f as any });
+  const before = Date.now();
+  r.push(ev({})); await r.flush();
+  const clock = Number((f.mock.calls[0] as any)[1].headers["x-deskmates-clock"]);
+  expect(clock).toBeGreaterThanOrEqual(before);
+  expect(clock).toBeLessThanOrEqual(Date.now());
+});
