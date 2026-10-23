@@ -168,11 +168,27 @@ function apply(msg: StateMessage) {
   if (!quiet && (!demo || params.has("alerts"))) for (const a of alerts.next(chars)) { deliver(a); announce.textContent = `${a.title}.`; }
 }
 
+/** The server pings every 20 s; this long without a frame means the connection died without closing (power cut, new network). */
+const SILENT_MS = 60_000;
+
 function connect(delay = 500) {
   const ws = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`);
-  ws.onopen = () => { conn.textContent = "live"; conn.classList.remove("off"); delay = 500; };
-  ws.onmessage = (e) => { try { apply(JSON.parse(e.data)); } catch { /* ignore malformed frame */ } };
-  ws.onclose = () => { conn.textContent = "offline"; conn.classList.add("off"); setTimeout(() => connect(Math.min(delay * 2, 10_000)), delay); };
+  let heard = Date.now();
+  let gone = false;
+  const lost = () => {
+    if (gone) return;
+    gone = true;
+    clearInterval(watch);
+    conn.textContent = "offline"; conn.classList.add("off"); document.body.classList.add("offline");
+    setTimeout(() => connect(Math.min(delay * 2, 10_000)), delay);
+  };
+  const watch = setInterval(() => { if (Date.now() - heard > SILENT_MS) { lost(); ws.close(); } }, 5_000);
+  ws.onopen = () => { heard = Date.now(); conn.textContent = "live"; conn.classList.remove("off"); document.body.classList.remove("offline"); delay = 500; };
+  ws.onmessage = (e) => {
+    heard = Date.now();
+    try { const msg = JSON.parse(e.data); if (msg.type === "state") apply(msg); } catch { /* ignore malformed frame */ }
+  };
+  ws.onclose = lost;
 }
 
 function renderMute() { const m = isMuted(); mute.setAttribute("aria-pressed", String(m)); mute.textContent = m ? "🔕" : "🔔"; }

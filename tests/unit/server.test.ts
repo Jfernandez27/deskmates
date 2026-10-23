@@ -325,3 +325,15 @@ test("a port already in use rejects startServer with EADDRINUSE instead of crash
   const web = mkdtempSync(join(tmpdir(), "dm-web-"));
   await expect(startServer({ port, webDir: web })).rejects.toMatchObject({ code: "EADDRINUSE" });
 });
+
+test("every open page gets a ping, so it can tell a dead connection from a quiet office", async () => {
+  const web = mkdtempSync(join(tmpdir(), "dm-web-"));
+  srv = await startServer({ port: 0, webDir: web, heartbeatMs: 30 });
+  const ws = new WebSocket(`ws://127.0.0.1:${srv.port}/ws`);
+  const types: string[] = [];
+  ws.on("message", (d) => types.push(JSON.parse(String(d)).type));
+  await new Promise((r) => setTimeout(r, 120));
+  ws.close();
+  expect(types[0]).toBe("state");
+  expect(types.filter((t) => t === "ping").length).toBeGreaterThanOrEqual(2);
+});
