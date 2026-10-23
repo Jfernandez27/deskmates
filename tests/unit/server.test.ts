@@ -49,6 +49,20 @@ test("websocket gets a snapshot and then updates with outfits", async () => {
   ws.close();
 });
 
+test("websocket: another site's page cannot read the office (Origin must be the office itself)", async () => {
+  const url = await boot();
+  const first = (origin?: string) => new Promise<string>((ok) => {
+    const ws = new WebSocket(url.replace("http", "ws") + "/ws", origin ? { origin } : {});
+    ws.on("message", (d) => { ok(JSON.parse(String(d)).type); ws.close(); });
+    ws.on("close", (code) => ok(`closed ${code}`));
+    ws.on("error", () => ok("error"));
+  });
+  expect(await first("https://evil.example")).toBe("closed 1008");
+  expect(await first(`http://localhost:${srv!.port}`)).toBe("closed 1008");
+  expect(await first(url)).toBe("state");
+  expect(await first()).toBe("state");
+});
+
 test("someone walking into an empty office starts a new deal, which holds while anyone is in", async () => {
   const deals = [5, 9, 13];
   const url = await boot(() => deals.shift()!);
