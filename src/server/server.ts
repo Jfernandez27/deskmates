@@ -157,6 +157,12 @@ export async function startServer(opts: Options): Promise<Running> {
     const given = q ?? cookieToken(req.headers.cookie) ?? /^Bearer (.+)$/.exec(req.headers.authorization ?? "")?.[1];
     return !!given && checkToken(`Bearer ${given}`, opts.token);
   };
+  /** A browser always says which page opened the socket; only the office's own page may read it (any site can reach 127.0.0.1). */
+  const ownPage = (req: IncomingMessage): boolean => {
+    const origin = req.headers.origin;
+    if (origin === undefined) return true;
+    try { return new URL(origin).host === req.headers.host; } catch { return false; }
+  };
   const roles: Role[] = loadRoles(opts.rolesFile ?? join(homedir(), ".config", "deskmates", "roles.toml"));
   const assetsDir = opts.assetsDir ?? join(packageRoot(), "assets");
   const themesDir = opts.themesDir ?? join(homedir(), ".config", "deskmates", "themes");
@@ -385,7 +391,7 @@ export async function startServer(opts: Options): Promise<Running> {
 
   const wss = new WebSocketServer({ server, path: "/ws" });
   wss.on("connection", (ws, req) => {
-    if (!remoteAllowed(req)) { ws.close(1008); return; }
+    if (!remoteAllowed(req) || !ownPage(req)) { ws.close(1008); return; }
     const local = isLoopback(req.socket.remoteAddress);
     sockets.set(ws, local);
     ws.on("close", () => sockets.delete(ws));
