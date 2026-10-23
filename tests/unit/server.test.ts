@@ -167,7 +167,7 @@ describe("GET /v1/history", () => {
     expect(h.date).toBe(today());
     expect(h.hours).toHaveLength(24);
     expect(h.totals).toMatchObject({ sessions: 1 });
-    expect(h.sessions[0]).toMatchObject({ source: "claude", cwd: "/home/j/atlas", tools: 1, ended: false });
+    expect(h.sessions[0]).toMatchObject({ source: "claude", cwd: "atlas", tools: 1, ended: false });
     expect(JSON.stringify(h)).not.toContain("hush-secret");
     expect((await fetch(`${url}/v1/history?date=${today()}`)).status).toBe(200);
     await srv!.close(); srv = undefined;
@@ -175,7 +175,7 @@ describe("GET /v1/history", () => {
     expect(file).not.toContain("hush-secret");
     expect(file).not.toContain("Bash");
     url = await bootWithHistory(dir);
-    expect((await (await fetch(`${url}/v1/history`)).json()).sessions[0]).toMatchObject({ cwd: "/home/j/atlas", tools: 1 });
+    expect((await (await fetch(`${url}/v1/history`)).json()).sessions[0]).toMatchObject({ cwd: "atlas", tools: 1 });
   });
 
   test("past days come from disk; missing is 404, malformed dates are 400", async () => {

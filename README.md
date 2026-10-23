@@ -112,7 +112,7 @@ The **History** button at the top right opens today's history: who worked, for h
 | Cursor agent (editor and CLI) | `~/.cursor/projects/*/agent-transcripts/*/*.jsonl` | lines have no timestamps; the file time is used |
 | Gemini CLI | `~/.gemini/tmp/*/chats/session-*.jsonl` (`$GEMINI_CLI_HOME`) | tools and tokens per message |
 
-These tools write no explicit "waiting for permission" or "session ended" line in every case, so their characters fall asleep after 10 quiet minutes and leave after 30. Sessions that were already quiet when deskmates started are ignored. Turn this off with `serve --no-transcripts`. `deskmates doctor` lists which ones it found.
+These tools write no explicit "waiting for permission" or "session ended" line in every case, so their characters fall asleep after 10 quiet minutes (one waiting for you keeps its **?**) and leave after 30. Sessions that were already quiet when deskmates started are ignored. Turn this off with `serve --no-transcripts`. `deskmates doctor` lists which ones it found.
 
 For anything else, add the [MCP server](docs/mcp.md) to its MCP settings or post events to the [ingest API](docs/ingest-api.md).
 

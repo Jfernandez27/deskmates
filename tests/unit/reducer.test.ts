@@ -266,3 +266,16 @@ describe("owners", () => {
     expect(s.characters["aaaaaaaa:claude//c"].desk).toBe(1);
   });
 });
+
+test("an agent waiting for your answer keeps its ? instead of falling asleep, and still leaves after the long silence", () => {
+  let s = run([ev({ kind: "start" }), ev({ kind: "waiting" }, 1000)]);
+  s = tick(s, T0 + 1000 + SLEEP_AFTER_MS + 1);
+  expect(ch(s).status).toBe("waiting");
+  s = tick(s, T0 + 1000 + LEAVE_AFTER_MS + 1);
+  expect(ch(s).status).toBe("leaving");
+});
+
+test("going idle again keeps how long the last stretch of work lasted", () => {
+  let s = run([ev({ kind: "start" }), ev({ kind: "idle" }, 5000), ev({ kind: "idle" }, 6000)]);
+  expect(ch(s).workedMs).toBe(5000);
+});
