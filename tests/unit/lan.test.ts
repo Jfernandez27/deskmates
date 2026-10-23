@@ -32,7 +32,11 @@ test.skipIf(!lanIp)("with --lan, the network needs the token; the link sets a co
   expect(ok.status).toBe(200);
   const cookie = ok.headers.get("set-cookie")!;
   expect(cookie).toMatch(/HttpOnly/);
-  expect((await fetch(`${base}/healthz`, { headers: { cookie: cookie.split(";")[0] } })).status).toBe(200);
+  const again = await fetch(`${base}/healthz`, { headers: { cookie: cookie.split(";")[0] } });
+  expect(again.status).toBe(200);
+  // every request with the cookie renews it, so a wall screen open for weeks never loses it
+  expect(again.headers.get("set-cookie")).toMatch(/Max-Age=2592000/);
+  expect((await fetch(`${base}/healthz`, { headers: { cookie: "deskmates_token=wrong" } })).headers.get("set-cookie")).toBeNull();
   expect((await fetch(`http://127.0.0.1:${port}/healthz`)).status).toBe(200);
 });
 

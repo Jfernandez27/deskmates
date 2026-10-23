@@ -285,8 +285,9 @@ export async function startServer(opts: Options): Promise<Running> {
     try {
       const url = (req.url ?? "/").split("?")[0];
       if (!remoteAllowed(req)) { res.writeHead(401, { "content-type": "text/plain" }).end("deskmates: open the link with ?token=… shown by `deskmates serve --lan`"); return; }
-      if (!isLoopback(req.socket.remoteAddress) && new URL(req.url ?? "/", "http://x").searchParams.has("token") && opts.token) {
-        // remember the token so the page, its assets and the WebSocket work without it in every URL
+      if (!isLoopback(req.socket.remoteAddress) && opts.token && (new URL(req.url ?? "/", "http://x").searchParams.has("token") || cookieToken(req.headers.cookie))) {
+        // remember the token so the page, its assets and the WebSocket work without it in every URL;
+        // every request renews it, so a page that keeps fetching never sees it expire
         res.setHeader("set-cookie", `${COOKIE}=${encodeURIComponent(opts.token)}; Path=/; HttpOnly; SameSite=Strict; Max-Age=2592000`);
       }
       if (url === "/v1/hook/claude") {

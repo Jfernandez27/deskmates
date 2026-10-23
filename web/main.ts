@@ -121,7 +121,7 @@ function renderRoster() {
 // the bar sums the office up by state; each count is a button that shows the next agent in that state
 const SUMMARY: [ViewCharacter["status"], string][] = [["waiting", "waiting"], ["working", "working"], ["idle", "done"], ["sleeping", "asleep"]];
 const turn = new Map<string, number>();
-/** a shared office is quiet: decided once, right after /v1/config */
+/** a shared office is quiet: decided after /v1/config, which is read again on every reconnect */
 let quiet = false;
 function renderSummary() {
   const parts = SUMMARY.map(([status, word]) => ({ status, text: `${chars.filter((c) => c.status === status).length} ${word}` }))
@@ -171,8 +171,11 @@ function apply(msg: StateMessage) {
 /** The server pings every 20 s; this long without a frame means the connection died without closing (power cut, new network). */
 const SILENT_MS = 60_000;
 
+let opens = 0;
 function connect(delay = 500) {
-  const ws = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`);
+  // a link opened with ?token keeps working after its cookie expires (a tablet left open for weeks)
+  const token = params.get("token");
+  const ws = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws${token ? `?token=${encodeURIComponent(token)}` : ""}`);
   let heard = Date.now();
   let gone = false;
   const lost = () => {
@@ -183,7 +186,10 @@ function connect(delay = 500) {
     setTimeout(() => connect(Math.min(delay * 2, 10_000)), delay);
   };
   const watch = setInterval(() => { if (Date.now() - heard > SILENT_MS) { lost(); ws.close(); } }, 5_000);
-  ws.onopen = () => { heard = Date.now(); conn.textContent = "live"; conn.classList.remove("off"); document.body.classList.remove("offline"); delay = 500; };
+  ws.onopen = () => {
+    heard = Date.now(); conn.textContent = "live"; conn.classList.remove("off"); document.body.classList.remove("offline"); delay = 500;
+    if (opens++) void afterReconnect();
+  };
   ws.onmessage = (e) => {
     heard = Date.now();
     try { const msg = JSON.parse(e.data); if (msg.type === "state") apply(msg); } catch { /* ignore malformed frame */ }
@@ -249,9 +255,14 @@ for (const id of index.themes) {
 }
 let serverTheme: string | undefined;
 let serverShared: boolean | undefined;
-try { const cfg = await (await fetch("/v1/config")).json(); serverTheme = cfg.theme; serverShared = cfg.shared === true; } catch { /* older service */ }
-quiet = quietMode(params, { shared: serverShared });
-if (quiet) { mute.hidden = true; renderSummary(); }
+/** Reads /v1/config; a failed read keeps what the last one said (none at load: an older service, or a restart). */
+async function loadConfig() {
+  try { const cfg = await (await fetch("/v1/config")).json(); serverTheme = cfg.theme; serverShared = cfg.shared === true; } catch { /* keep the last answer */ }
+  quiet = quietMode(params, { shared: serverShared });
+  mute.hidden = quiet;
+  renderSummary();
+}
+await loadConfig();
 let seasons: Season[] = [];
 try { seasons = (await (await fetch("/assets/themes/seasons.json")).json()).seasons ?? []; } catch { seasons = []; }
 /** the browser's time zone decides the hemisphere: in Santiago autumn starts in March */
@@ -277,8 +288,12 @@ let applied = "";
 const now = () => (fixedT !== undefined ? new Date(2026, 9, 14, 10, 10) : new Date());
 /** Two floors that differ at most in their furniture. */
 const sameGround = (a: Floor, b: Floor) => JSON.stringify({ ...a, decor: [] }) === JSON.stringify({ ...b, decor: [] });
+/** the season drawn now, and the latest useTheme call: an older one that finishes later must not win */
+let appliedSeason: string | undefined;
+let themeCall = 0;
 async function useTheme(id: string) {
   chosen = id;
+  const call = ++themeCall;
   const resolved = resolveAuto(id, now());
   const theme = themes.get(resolved) ?? themes.get(index.default)!;
   // season decor is placed for the room, so a theme with a floor of its own gets none
@@ -291,9 +306,14 @@ async function useTheme(id: string) {
     floor = await new Promise<HTMLImageElement>((ok, fail) => { const i = new Image(); i.onload = () => ok(i); i.onerror = fail; i.src = `/assets/${theme.floor}`; });
   } catch {
     console.warn(`deskmates: theme ${theme.id}: floor ${theme.floor} not found`);
-    if (theme.id !== index.default) return useTheme(index.default);
-    throw new Error(`deskmates: the default theme's floor ${theme.floor} is missing`);
+    if (theme.id === index.default) throw new Error(`deskmates: the default theme's floor ${theme.floor} is missing`);
+    if (call !== themeCall) return;
+    // draw the default for now but keep the choice: the minute check tries the chosen theme again (a server asleep at 19:00)
+    await useTheme(index.default);
+    if (call + 1 === themeCall) { chosen = id; themeSelect.value = id; applied = ""; }
+    return;
   }
+  if (call !== themeCall) return;
   art = { theme, floor: tint(floor, theme.floorTint), wall: tint(assets.wall, theme.wallTint), decor, season };
   // the same ground with other furniture only re-routes whoever is walking (setDecor); another ground moves everyone
   const furniture = [...decor, ...(season?.decor ?? [])];
@@ -301,6 +321,7 @@ async function useTheme(id: string) {
   syncRooms();
   applyPage(theme);
   applied = theme.id;
+  appliedSeason = season?.id;
   themeSelect.value = id;
   if (fixedT !== undefined) frame(performance.now());
 }
@@ -335,8 +356,17 @@ yours.label = "Yours";
 for (const t of themes.values()) (index.user?.includes(t.id) ? yours : themeSelect).append(new Option(t.label, t.id));
 if (yours.children.length) themeSelect.append(yours);
 themeSelect.addEventListener("change", () => { saveTheme(themeSelect.value); void useTheme(themeSelect.value); });
-// "auto" switches between day and night on its own
-setInterval(() => { if (chosen === "auto" && resolveAuto("auto", now()) !== applied) void useTheme("auto"); }, 60_000);
+/** The service may have restarted with other options: read its config again, and follow its theme unless this page chose one. */
+async function afterReconnect() {
+  await loadConfig();
+  if (!params.get("theme") && !savedTheme() && serverTheme && serverTheme !== chosen) void useTheme(serverTheme);
+}
+// every minute: "auto" switches between day and night, seasons follow the date, and a theme that failed to load is tried again
+setInterval(() => {
+  const want = themes.get(resolveAuto(chosen, now())) ?? themes.get(index.default)!;
+  const season = want.layout ? undefined : seasonNow(now())?.id;
+  if (want.id !== applied || season !== appliedSeason) void useTheme(chosen);
+}, 60_000);
 await useTheme(params.get("theme") ?? savedTheme() ?? serverTheme ?? index.default);
 let prev = performance.now();
 /** device pixels per font pixel of the labels in the last draw (read by the tests) */
