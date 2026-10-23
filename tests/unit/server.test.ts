@@ -1,4 +1,4 @@
-import { test, expect, afterEach, describe } from "vitest";
+import { test, expect, afterEach, describe, vi } from "vitest";
 import { readFileSync, mkdtempSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -336,4 +336,17 @@ test("every open page gets a ping, so it can tell a dead connection from a quiet
   ws.close();
   expect(types[0]).toBe("state");
   expect(types.filter((t) => t === "ping").length).toBeGreaterThanOrEqual(2);
+});
+
+test("hook events keep counting when this machine's clock steps back (NTP after boot, dual boot)", async () => {
+  const url = await boot();
+  const base = { session_id: "s", transcript_path: "/h/.claude/projects/p/s.jsonl", cwd: "/p" };
+  vi.useFakeTimers({ toFake: ["Date"] });
+  try {
+    vi.setSystemTime(new Date("2026-10-14T12:00:00Z"));
+    await post(url, JSON.stringify({ ...base, hook_event_name: "SessionStart" }));
+    vi.setSystemTime(new Date("2026-10-14T09:00:00Z"));
+    await post(url, JSON.stringify({ ...base, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } }));
+    expect(Object.values(srv!.state().characters)[0]).toMatchObject({ tool: "Bash", detail: "npm test" });
+  } finally { vi.useRealTimers(); }
 });

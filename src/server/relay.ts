@@ -163,7 +163,7 @@ export class Relay {
     try {
       const res = await Promise.race([this.#fetch(`${this.#o.url.replace(/\/+$/, "")}/v1/events`, {
         method: "POST",
-        headers: { authorization: `Bearer ${this.#o.token}`, "content-type": "application/json" },
+        headers: { authorization: `Bearer ${this.#o.token}`, "content-type": "application/json", "x-deskmates-clock": String(Date.now()) },
         body,
         signal,
       }), timedOut]);
