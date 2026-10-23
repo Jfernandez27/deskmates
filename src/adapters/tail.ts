@@ -7,14 +7,18 @@ export class LineTail {
   readonly path: string;
   constructor(path: string, fromEnd = 0) { this.path = path; this.offset = fromEnd; }
 
-  /** New complete lines since the last call; `reset` is true when the file was truncated or replaced. */
+  /**
+   * New complete lines since the last call; `reset` is true when the file was truncated or replaced.
+   * A file it cannot stat, open or read (gone, root-owned) gives no lines and is tried again next call.
+   */
   async read(): Promise<{ lines: string[]; reset: boolean }> {
     let size: number;
     try { size = (await stat(this.path)).size; } catch { return { lines: [], reset: false }; }
     let reset = false;
     if (size < this.offset) { this.offset = 0; this.rest = ""; reset = true; }
     if (size === this.offset) return { lines: [], reset };
-    const fh = await open(this.path, "r");
+    let fh;
+    try { fh = await open(this.path, "r"); } catch { return { lines: [], reset }; }
     try {
       const buf = Buffer.alloc(size - this.offset);
       await fh.read(buf, 0, buf.length, this.offset);
@@ -22,6 +26,8 @@ export class LineTail {
       const lines = (this.rest + buf.toString("utf8")).split("\n");
       this.rest = lines.pop() ?? "";
       return { lines: lines.filter((l) => l.trim()), reset };
+    } catch {
+      return { lines: [], reset };
     } finally {
       await fh.close();
     }

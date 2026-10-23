@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { readFileSync, mkdtempSync, mkdirSync, writeFileSync, utimesSync, appendFileSync } from "node:fs";
+import { readFileSync, mkdtempSync, mkdirSync, writeFileSync, utimesSync, appendFileSync, chmodSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { codex } from "../../src/adapters/codex/transcript.ts";
@@ -61,6 +61,26 @@ test("gemini: header starts, tool calls, tokens per message id (last copy wins),
   expect(evs[4].detail).toBe("npm test");
   expect(evs.filter((e) => e.kind === "usage").at(-1)!.tokens).toEqual({ input: 1300 + 300, output: 150, cacheRead: 1700 });
   expect(evs[0]).toMatchObject({ source: "gemini", cwd: "myproj", session: "7f3c2a9e-0000-4000-8000-000000000001" });
+});
+
+test.skipIf(process.getuid?.() === 0)("watcher: a file it cannot open is skipped for now, not fatal, and read once it can", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "dm-watch-"));
+  const locked = join(dir, "locked.jsonl"), live = join(dir, "live.jsonl");
+  writeFileSync(locked, JSON.stringify({ k: "start" }) + "\n");
+  writeFileSync(live, JSON.stringify({ k: "start" }) + "\n");
+  chmodSync(locked, 0o000);
+  const fake: TranscriptAdapter = {
+    source: "fake",
+    patterns: () => [join(dir, "*.jsonl")],
+    decode: (l: any, ctx) => [{ source: "fake", session: ctx.path, kind: l.k, ts: new Date().toISOString(), transport: "transcript" }],
+  };
+  const got: AgentEvent[] = [];
+  const w = new TranscriptWatcher([fake], (e) => got.push(...e));
+  await w.scan();
+  expect(got.map((e) => e.session)).toEqual([live]);
+  chmodSync(locked, 0o600);
+  await w.scan();
+  expect(got.map((e) => e.session)).toEqual([live, locked]);
 });
 
 test("watcher: replays active files, skips files that were quiet at startup, follows growth", async () => {
