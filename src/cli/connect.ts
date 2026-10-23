@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, existsSync, copyFileSync, renameSync, statSync, chmodSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, copyFileSync, renameSync, statSync, chmodSync, realpathSync } from "node:fs";
 import { join } from "node:path";
 
 /** Claude Code hook events deskmates listens to. */
@@ -12,6 +12,19 @@ type Entry = Record<string, unknown> & { hooks?: { type: string; command: string
 type Settings = Record<string, unknown> & { hooks?: Record<string, Entry[]> };
 
 const quote = (p: string) => `'${p.replace(/'/g, `'\\''`)}'`;
+
+/** Ours by the mark, or by the command alone: Claude Code drops keys it does not know when it rewrites settings.json. */
+function isOurs(h: Entry | undefined): boolean {
+  if (h?.[MARK]) return true;
+  const cmds = Array.isArray(h?.hooks) ? h.hooks : [];
+  return cmds.length > 0 && cmds.every((c) => typeof c?.command === "string" && /deskmates-hook\.sh'?$/.test(c.command));
+}
+
+/** settings.json itself, or the file it links to (stow, home-manager), so editing it never replaces the link. */
+function settingsFile(profileDir: string): string {
+  const file = join(profileDir, "settings.json");
+  return existsSync(file) ? realpathSync(file) : file;
+}
 
 function read(file: string): { data: Settings; indent: string | number; exists: boolean } {
   if (!existsSync(file)) return { data: {}, indent: 2, exists: false };
@@ -34,7 +47,7 @@ function strip(data: Settings): Settings {
   if (!data.hooks) return data;
   const hooks: Record<string, Entry[]> = {};
   for (const [ev, list] of Object.entries(data.hooks)) {
-    const kept = Array.isArray(list) ? list.filter((h) => !h?.[MARK]) : list;
+    const kept = Array.isArray(list) ? list.filter((h) => !isOurs(h)) : list;
     if (!Array.isArray(kept) || kept.length > 0) hooks[ev] = kept;
   }
   const out: Settings = { ...data, hooks };
@@ -44,7 +57,7 @@ function strip(data: Settings): Settings {
 
 /** Adds one marked hook entry per event to <profile>/settings.json. Backs the file up first. */
 export function connect(profileDir: string, hookPath: string): string | undefined {
-  const file = join(profileDir, "settings.json");
+  const file = settingsFile(profileDir);
   const { data, indent, exists } = read(file);
   const clean = strip(data);
   const hooks: Record<string, Entry[]> = { ...(clean.hooks ?? {}) };
@@ -63,7 +76,7 @@ export function connect(profileDir: string, hookPath: string): string | undefine
 
 /** Removes only the entries deskmates added. */
 export function disconnect(profileDir: string): boolean {
-  const file = join(profileDir, "settings.json");
+  const file = settingsFile(profileDir);
   if (!existsSync(file)) return false;
   const { data, indent } = read(file);
   const next = strip(data);
@@ -73,10 +86,10 @@ export function disconnect(profileDir: string): boolean {
 }
 
 export function status(profileDir: string, hookPath: string) {
-  const file = join(profileDir, "settings.json");
+  const file = settingsFile(profileDir);
   if (!existsSync(file)) return { connected: false, entries: 0, stale: false };
   const { data } = read(file);
-  const ours = Object.values(data.hooks ?? {}).flat().filter((h) => h?.[MARK]);
+  const ours = Object.values(data.hooks ?? {}).flat().filter(isOurs);
   const stale = ours.some((h) => h.hooks?.[0]?.command !== quote(hookPath));
   return { connected: ours.length > 0, entries: ours.length, stale };
 }
