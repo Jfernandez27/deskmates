@@ -33,3 +33,27 @@ export class LineTail {
     }
   }
 }
+
+/** The first line of a file, read in chunks up to `max` bytes; undefined when there is none, it is longer, or the file cannot be read. */
+export async function firstLine(path: string, max = 1 << 20): Promise<string | undefined> {
+  let fh;
+  try { fh = await open(path, "r"); } catch { return undefined; }
+  try {
+    const chunks: Buffer[] = [];
+    let total = 0;
+    while (total < max) {
+      const buf = Buffer.alloc(Math.min(64 * 1024, max - total));
+      const { bytesRead } = await fh.read(buf, 0, buf.length, total);
+      if (bytesRead === 0) return undefined;
+      const nl = buf.subarray(0, bytesRead).indexOf(10);
+      if (nl >= 0) { chunks.push(buf.subarray(0, nl)); return Buffer.concat(chunks).toString("utf8"); }
+      chunks.push(buf.subarray(0, bytesRead));
+      total += bytesRead;
+    }
+    return undefined;
+  } catch {
+    return undefined;
+  } finally {
+    await fh.close();
+  }
+}

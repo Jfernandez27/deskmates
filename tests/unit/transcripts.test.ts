@@ -63,6 +63,31 @@ test("gemini: header starts, tool calls, tokens per message id (last copy wins),
   expect(evs[0]).toMatchObject({ source: "gemini", cwd: "myproj", session: "7f3c2a9e-0000-4000-8000-000000000001" });
 });
 
+test("watcher: a session that was quiet at startup and resumes later shows up (its header line is still read)", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "dm-watch-"));
+  const old = join(dir, "rollout.jsonl");
+  writeFileSync(old, JSON.stringify({ k: "meta", id: "s-1" }) + "\n" + JSON.stringify({ k: "idle" }) + "\n");
+  const hourAgo = (Date.now() - 3_600_000) / 1000;
+  utimesSync(old, hourAgo, hourAgo);
+  // like codex and gemini: the session id is only on the first line, and lines before it decode to nothing
+  const fake: TranscriptAdapter = {
+    source: "fake",
+    patterns: () => [join(dir, "*.jsonl")],
+    decode: (l: any, ctx) => {
+      if (l.k === "meta") { ctx.state.session = l.id; return [{ source: "fake", session: l.id, kind: "start", ts: new Date().toISOString(), transport: "transcript" }]; }
+      if (!ctx.state.session) return [];
+      return [{ source: "fake", session: String(ctx.state.session), kind: l.k, ts: new Date().toISOString(), transport: "transcript" }];
+    },
+  };
+  const got: AgentEvent[] = [];
+  const w = new TranscriptWatcher([fake], (e) => got.push(...e));
+  await w.scan();
+  expect(got).toEqual([]);
+  appendFileSync(old, JSON.stringify({ k: "tool" }) + "\n");
+  await w.scan();
+  expect(got.map((e) => `${e.session}:${e.kind}`)).toEqual(["s-1:tool"]);
+});
+
 test.skipIf(process.getuid?.() === 0)("watcher: a file it cannot open is skipped for now, not fatal, and read once it can", async () => {
   const dir = mkdtempSync(join(tmpdir(), "dm-watch-"));
   const locked = join(dir, "locked.jsonl"), live = join(dir, "live.jsonl");
