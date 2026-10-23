@@ -28,7 +28,8 @@ const charSelect = document.getElementById("chars") as HTMLSelectElement;
 
 const history = new HistoryPanel(document.getElementById("history-btn") as HTMLButtonElement, document.getElementById("history")!, !demo);
 const shareBtn = document.getElementById("share-btn") as HTMLButtonElement;
-shareBtn.append(pixelIcon(ICON_QR, 2, ""));
+/** the bar's pixel icons take the page's text colour, so they are drawn again when a theme changes it */
+const drawIcons = () => { shareBtn.replaceChildren(pixelIcon(ICON_QR, 2, "")); kioskShown = ""; applyKiosk(); };
 const lanOff: LanInfo = { lan: false, port: 0, primary: null, alternatives: [], token: null };
 new ShareDialog(shareBtn, document.getElementById("share") as HTMLDialogElement,
   () => (demo ? Promise.resolve(lanOff) : fetch("/v1/lan", { cache: "no-store" }).then((r) => r.json())));
@@ -130,11 +131,15 @@ function renderSummary() {
   if (count.dataset.text === key) return;
   count.dataset.text = key;
   if (!parts.length) { count.textContent = "0 agents"; return; }
+  // the buttons are rebuilt: a keyboard user on "2 working" stays on that count, not thrown back to the page
+  const focused = count.contains(document.activeElement) ? (document.activeElement as HTMLElement).dataset.status : undefined;
   count.replaceChildren(...parts.flatMap((p, i) => {
     const b = Object.assign(document.createElement("button"), { type: "button", textContent: p.text, className: `sum ${p.status}` });
+    b.dataset.status = p.status;
     b.addEventListener("click", () => jumpTo(p.status));
     return i ? [document.createTextNode(" · "), b] : [b];
   }));
+  if (focused) count.querySelector<HTMLElement>(`[data-status="${focused}"]`)?.focus();
 }
 /** Shows the card of the next agent in a state, next to it, as a click on it would (focusing its terminal in VS Code). */
 function jumpTo(status: string) {
@@ -320,9 +325,11 @@ async function useTheme(id: string) {
   if (sameGround(scene.floor, f)) scene.setDecor(furniture); else scene.setFloor(f, furniture);
   syncRooms();
   applyPage(theme);
+  drawIcons();
   applied = theme.id;
   appliedSeason = season?.id;
-  themeSelect.value = id;
+  // a saved or ?theme= id that no longer exists (a deleted theme of your own) shows the theme drawn, not a blank select
+  themeSelect.value = id === "auto" || themes.has(id) ? id : theme.id;
   if (fixedT !== undefined) frame(performance.now());
 }
 // characters: ?chars= wins, then this browser's choice; our own set by default
@@ -373,7 +380,8 @@ let prev = performance.now();
 let lastUnit = 1;
 function frame(ms: number) {
   // fixed-time renders (screenshots) only move the scene through __deskmates.advance(), so they are reproducible
-  scene.step(fixedT === undefined ? ms - prev : 0);
+  // a tab hidden for an hour comes back with an hour-long step: take it as a short one, so nobody teleports
+  scene.step(fixedT === undefined ? Math.min(ms - prev, 250) : 0);
   prev = ms;
   applyKiosk();
   const t = fixedT ?? ms;

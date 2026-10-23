@@ -56,7 +56,8 @@ export class HistoryPanel {
     this.body = panel.querySelector(".history-body")!;
     button.addEventListener("click", () => (this.isOpen() ? this.close() : this.open()));
     panel.querySelector(".history-close")!.addEventListener("click", () => this.close());
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && this.isOpen()) { e.preventDefault(); this.close(); } });
+    // a modal dialog over the panel (Share) takes its own Escape: only the top layer closes
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && this.isOpen() && !document.querySelector("dialog[open]")) { e.preventDefault(); this.close(); } });
   }
 
   isOpen() { return !this.panel.hidden; }
