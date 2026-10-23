@@ -16,7 +16,7 @@
 
 The hook is `bin/deskmates-hook.sh`: it posts the hook payload to `127.0.0.1:47821` with a 50 ms ceiling and always exits 0. Set `DESKMATES_PORT` in the agent's environment if you serve on another port.
 
-- **Several profiles.** Connect each one. Characters show the profile name (`claude-work · designer`), so two profiles never mix.
+- **Several profiles.** Connect each one, or all of them with `deskmates connect --all` (every `~/.claude*` directory that holds a `settings.json` or `projects/`, plus `$CLAUDE_CONFIG_DIR`); `doctor` checks the same list. Characters show the profile name (`claude-work · designer`), so two profiles never mix.
 - **Named agents.** Sessions started with `claude --agent plugin:name` and subagents (`Explore`, `Plan`, your own) carry their name; [roles.md](roles.md) maps names to outfits.
 - **Tokens.** Read from the session transcript after each event.
 - **Moved the repository?** Run `connect` again: `doctor` warns when hooks point to an old path.

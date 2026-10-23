@@ -4,7 +4,7 @@ import { homedir, networkInterfaces } from "node:os";
 import { join, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 import { startServer, DEFAULT_PORT } from "../src/server/server.ts";
-import { connect, disconnect, status } from "../src/cli/connect.ts";
+import { connect, disconnect, findProfiles, status } from "../src/cli/connect.ts";
 import { loadOrCreateToken, readRelayToken, TOKEN_FILE } from "../src/cli/token.ts";
 import { TRANSCRIPT_ADAPTERS } from "../src/adapters/index.ts";
 import { cast, eventsAt, endAll, normalize, DEFAULTS, TICK_MS } from "../src/cli/demo.ts";
@@ -28,12 +28,9 @@ const expand = (p: string) => resolve(p.replace(/^~(?=$|\/)/, homedir()));
 const profileArg = () => expand(flag("profile") ?? process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), ".claude"));
 const port = Number(flag("port") ?? process.env.DESKMATES_PORT ?? DEFAULT_PORT);
 
-function knownProfiles(): string[] {
-  const set = new Set<string>();
-  for (const p of [join(homedir(), ".claude"), process.env.CLAUDE_CONFIG_DIR, flag("profile")]) if (p && existsSync(expand(p))) set.add(expand(p));
-  for (const name of ["claude-work"]) { const p = join(homedir(), `.${name}`); if (existsSync(p)) set.add(p); }
-  return [...set];
-}
+const knownProfiles = () => findProfiles(homedir(), [process.env.CLAUDE_CONFIG_DIR, flag("profile")].map((p) => p && expand(p)));
+/** --all: every profile on this machine; otherwise the one named, $CLAUDE_CONFIG_DIR or ~/.claude */
+const targetProfiles = () => (args.includes("--all") ? knownProfiles() : [profileArg()]);
 
 async function main() {
   switch (cmd) {
@@ -69,15 +66,15 @@ async function main() {
       return;
     }
     case "connect": {
-      const p = profileArg();
-      const backup = connect(p, HOOK);
-      console.log(backup ? `Connected ${p}. Backup: ${backup}` : `Connected ${p}.`);
+      for (const p of targetProfiles()) {
+        const backup = connect(p, HOOK);
+        console.log(backup ? `Connected ${p}. Backup: ${backup}` : `Connected ${p}.`);
+      }
       if (port !== DEFAULT_PORT) console.log(`Note: the hook posts to port ${DEFAULT_PORT} unless DESKMATES_PORT is set in the agent's environment.`);
       return;
     }
     case "disconnect": {
-      const p = profileArg();
-      console.log(disconnect(p) ? `Disconnected ${p}.` : `Nothing to remove in ${p}.`);
+      for (const p of targetProfiles()) console.log(disconnect(p) ? `Disconnected ${p}.` : `Nothing to remove in ${p}.`);
       return;
     }
     case "demo": {
@@ -175,7 +172,8 @@ async function main() {
         console.log(`${n ? "✓" : "·"} ${a.source}: ${n ? `${n} transcript file(s) found` : "no transcripts found (not installed or never used)"}`);
       }
       for (const p of knownProfiles()) {
-        const s = status(p, HOOK);
+        let s;
+        try { s = status(p, HOOK); } catch (e) { line(false, `${p}: ${(e as Error).message}`); continue; }
         line(s.connected && !s.stale, `${p}: ${s.connected ? `${s.entries} hooks${s.stale ? ", pointing to an old path — run connect again" : ""}` : "not connected"}`);
       }
       process.exitCode = ok ? 0 : 1;
@@ -196,8 +194,9 @@ async function main() {
                                       --shared: host a shared office (implies --no-transcripts); it opens
                                       on the Headquarters floor unless --theme says otherwise
                                       See docs/shared-office.md
-  deskmates connect [--profile DIR]   add hooks to a Claude Code profile (default: $CLAUDE_CONFIG_DIR or ~/.claude)
-  deskmates disconnect [--profile DIR] remove only the hooks deskmates added
+  deskmates connect [--profile DIR | --all]   add hooks to a Claude Code profile (default: $CLAUDE_CONFIG_DIR or ~/.claude;
+                                      --all: every ~/.claude* profile)
+  deskmates disconnect [--profile DIR | --all] remove only the hooks deskmates added
   deskmates doctor [--relay <url>]    check curl, the hook, the service, transcripts and each profile
   deskmates token                     print the token for POST /v1/events (see docs/ingest-api.md)
   deskmates demo [--agents 6] [--meetings 1] [--waiting 1] [--subagents 1] [--breaks 1]

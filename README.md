@@ -72,10 +72,11 @@ Run `npm link` once to call that clone as `deskmates`; after a `git pull`, `npm 
 ```bash
 node bin/deskmates.ts connect                          # $CLAUDE_CONFIG_DIR, or ~/.claude
 node bin/deskmates.ts connect --profile ~/.claude-work # any other profile
+node bin/deskmates.ts connect --all                    # every ~/.claude* profile
 node bin/deskmates.ts doctor                           # checks curl, the hook, the service and each profile
 ```
 
-`connect` adds one hook per Claude Code event to `<profile>/settings.json`, each marked `"_deskmates": true`, after saving a timestamped backup next to it. Your existing hooks, plugins and settings are left exactly as they were. Run it again any time: it never duplicates entries.
+`connect` adds one hook per Claude Code event to `<profile>/settings.json`, each marked `"_deskmates": true` (an entry that runs only `deskmates-hook.sh` counts as ours even if Claude Code dropped the mark), after saving a timestamped backup next to it; a symlinked `settings.json` stays a link. Your existing hooks, plugins and settings are left exactly as they were. Run it again any time: it never duplicates entries.
 
 ```bash
 node bin/deskmates.ts disconnect --profile ~/.claude-work   # removes only what connect added

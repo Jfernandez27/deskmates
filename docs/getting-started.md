@@ -44,6 +44,7 @@ Each [GitHub release](https://github.com/Jfernandez27/deskmates/releases) also c
    ```bash
    deskmates connect                          # $CLAUDE_CONFIG_DIR or ~/.claude
    deskmates connect --profile ~/.claude-work # any other profile
+   deskmates connect --all                    # every ~/.claude* profile at once
    ```
    New Claude Code sessions in that profile walk into the office. Sessions already running pick the hooks up on their next event.
 3. **Check everything.**
@@ -137,7 +138,7 @@ If a demo is killed with `kill -9` it cannot send its goodbyes; its agents fall 
 ## Uninstall
 
 ```bash
-deskmates disconnect --profile ~/.claude        # and any other profile you connected
+deskmates disconnect --all                       # every ~/.claude* profile
 npm uninstall -g deskmates                       # or `npm unlink` if you linked it
 rm -rf ~/.config/deskmates ~/.local/state/deskmates   # token, roles, history
 ```
