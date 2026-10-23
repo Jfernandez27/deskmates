@@ -416,7 +416,15 @@ export async function startServer(opts: Options): Promise<Running> {
   }, 1000);
   timer.unref();
 
-  await new Promise<void>((ok, fail) => { server.once("error", fail); server.listen(opts.port ?? DEFAULT_PORT, host, () => ok()); });
+  // ws re-emits the http server's errors; without a listener a busy port would throw past the promise below
+  wss.on("error", () => {});
+  try {
+    await new Promise<void>((ok, fail) => { server.once("error", fail); server.listen(opts.port ?? DEFAULT_PORT, host, () => ok()); });
+  } catch (e) {
+    clearInterval(timer); clearInterval(procTimer); clearInterval(relayTimer);
+    watcher?.stop();
+    throw e;
+  }
   const addr = server.address();
   return {
     port: typeof addr === "object" && addr ? addr.port : opts.port ?? DEFAULT_PORT,
