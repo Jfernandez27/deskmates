@@ -59,7 +59,7 @@ test("gemini: header starts, tool calls, tokens per message id (last copy wins),
   expect(kinds(evs)).toEqual(["start", "tool", "tool:read_file", "usage", "tool:run_shell_command", "usage", "usage", "idle"]);
   expect(evs[2].detail).toBe("app.ts");
   expect(evs[4].detail).toBe("npm test");
-  expect(evs.filter((e) => e.kind === "usage").at(-1)!.tokens).toEqual({ input: 1300 + 300, output: 150, cacheRead: 1700 });
+  expect(evs.filter((e) => e.kind === "usage").at(-1)!.tokens).toEqual({ input: 1300 + 300, output: 150 + 10, cacheRead: 1700 }); // thinking is billed as output
   expect(evs[0]).toMatchObject({ source: "gemini", cwd: "myproj", session: "7f3c2a9e-0000-4000-8000-000000000001" });
 });
 
