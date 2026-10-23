@@ -92,7 +92,7 @@ test("someone walking into an empty office starts a new deal, which holds while 
 test("bad input never crashes the server", async () => {
   const url = await boot();
   expect((await post(url, "{not json")).status).toBe(400);
-  expect((await post(url, "a".repeat(70_000))).status).toBe(413);
+  expect((await post(url, "a".repeat(9 * 1024 * 1024))).status).toBe(413);
   expect((await post(url, JSON.stringify({ hook_event_name: "PreCompact" }))).status).toBe(204);
   expect((await fetch(`${url}/v1/hook/claude`)).status).toBe(405);
   expect((await fetch(`${url}/healthz`)).status).toBe(200);
@@ -356,4 +356,16 @@ test("hook events keep counting when this machine's clock steps back (NTP after 
     await post(url, JSON.stringify({ ...base, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } }));
     expect(Object.values(srv!.state().characters)[0]).toMatchObject({ tool: "Bash", detail: "npm test" });
   } finally { vi.useRealTimers(); }
+});
+
+test("the hook endpoint takes only JSON (a web page cannot post it without a preflight), and large payloads", async () => {
+  const url = await boot();
+  const base = { session_id: "s", transcript_path: "/h/.claude/projects/p/s.jsonl", cwd: "/p" };
+  const asText = await fetch(`${url}/v1/hook/claude`, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ ...base, hook_event_name: "SessionStart" }) });
+  expect(asText.status).toBe(415);
+  expect(Object.keys(srv!.state().characters)).toHaveLength(0);
+  // a PostToolUse carries the tool's whole output: a big Read must not be dropped
+  const big = await post(url, JSON.stringify({ ...base, hook_event_name: "PostToolUse", tool_name: "Read", tool_response: "x".repeat(300 * 1024) }));
+  expect(big.status).toBe(204);
+  expect(Object.keys(srv!.state().characters)).toHaveLength(1);
 });
