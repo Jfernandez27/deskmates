@@ -56,6 +56,11 @@ export class UsageTracker {
 
   forget(key: string) { this.tracks.delete(key); }
 
+  /** Keeps only the sessions `keep` accepts: a session killed without SessionEnd never sends the end that forgets it. */
+  prune(keep: (key: string) => boolean) { for (const k of this.tracks.keys()) if (!keep(k)) this.tracks.delete(k); }
+
+  get size(): number { return this.tracks.size; }
+
   private ingest(t: Track, line: string) {
     if (!line.includes('"usage"')) return;
     let d: any;

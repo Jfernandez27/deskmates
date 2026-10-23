@@ -86,3 +86,18 @@ test("sessions of tools without hooks get the ancestry of their process, found b
   expect(c.source).toBe("gemini");
   expect(c.pids).toEqual([900, 800, 700]);
 });
+
+test("a session whose process cannot be found is looked up less and less often, not every round forever", async () => {
+  const web = mkdtempSync(join(tmpdir(), "dm-w-"));
+  writeFileSync(join(web, "index.html"), "x");
+  let listings = 0;
+  const procLister = async () => { listings++; return []; };
+  srv = await startServer({ port: 0, webDir: web, ppidReader: reader, procLister, procScanMs: 10, token: TOKEN });
+  await fetch(`http://127.0.0.1:${srv.port}/v1/events`, {
+    method: "POST", headers: { authorization: `Bearer ${TOKEN}`, "content-type": "application/json" },
+    body: JSON.stringify([{ source: "gemini", session: "g1", kind: "start", cwd: "/w/nowhere" }]),
+  });
+  await new Promise((ok) => setTimeout(ok, 400));
+  expect(listings).toBeGreaterThan(0);
+  expect(listings).toBeLessThanOrEqual(6);
+});

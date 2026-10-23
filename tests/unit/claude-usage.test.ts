@@ -65,3 +65,11 @@ test("the model of the latest reply is taken once per change; synthetic replies 
   await t.update("k", f);
   expect(t.takeModel("k")).toBeUndefined();
 });
+
+test("prune forgets sessions that are no longer in the office", async () => {
+  const u = new UsageTracker();
+  await u.update("a", "/nowhere/a.jsonl");
+  await u.update("b", "/nowhere/b.jsonl");
+  u.prune((k) => k === "b");
+  expect(u.size).toBe(1);
+});
