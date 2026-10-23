@@ -209,3 +209,14 @@ test("when the lab answers again after a failure, it gets every character as it 
   r.push(ev({ session: "other", kind: "idle" })); await r.flush();
   expect(sent.flat().map((e) => e.session)).toEqual(["other"]);
 });
+
+test("close still sends its ends while a 429 pause holds the relay", async () => {
+  const calls: any[] = [];
+  let status = 429;
+  const f = vi.fn(async (_u: string, init: any) => { calls.push(JSON.parse(init.body)); return new Response("{}", { status }); });
+  const r = new Relay({ url: "http://lab", token: "t", owner: "a", ownerName: "A", ownerHost: "h", fetch: f as any, log: () => {} });
+  r.push(ev({ session: "x" })); await r.flush();
+  status = 202;
+  await r.close(reduce(emptyState(), ev({ session: "x" })));
+  expect(calls.at(-1).map((e: any) => `${e.session}:${e.kind}`)).toEqual(["x:end", "x:start"]);
+});
