@@ -1,4 +1,4 @@
-import type { AgentEvent, OfficeState } from "../types/events.ts";
+import type { AgentEvent, Character, OfficeState } from "../types/events.ts";
 import { FIELDS, validate } from "./ingest.ts";
 
 export type RelayOptions = {
@@ -42,9 +42,14 @@ export class Relay {
   #pausedUntil = -Infinity;
   /** the drain in flight; a flush called meanwhile joins it (the drain keeps going until the queue is empty) */
   #inflight: Promise<void> | undefined;
+  /** this office now, sent whole when the lab answers again after a failure */
+  #current?: () => OfficeState;
+  /** a batch was lost since the lab last took one */
+  #lost = false;
 
-  constructor(o: RelayOptions) {
+  constructor(o: RelayOptions, current?: () => OfficeState) {
     this.#o = o;
+    this.#current = current;
     this.#fetch = o.fetch ?? fetch;
     this.#log = o.log ?? ((l) => console.error(l));
     this.#buffer = Math.max(1, o.buffer ?? 1000);
@@ -132,8 +137,13 @@ export class Relay {
       }
       // a 4xx says the lab will refuse it again (bad token, too big, over the limit): no retry
       if (r !== "ok" && !(typeof r === "number" && r >= 400 && r < 500)) r = await this.#send(body);
-      if (r === "ok") continue;
+      if (r === "ok") {
+        // the lab may have restarted or never heard of sessions that went quiet while it was away: tell it who is here
+        if (this.#lost) { this.#lost = false; for (const e of snapshot(this.#current?.())) this.push(e); }
+        continue;
+      }
       this.#dropped += batch.length;
+      if (r === "unreachable" || (typeof r === "number" && r >= 500)) this.#lost = true;
       const now = Date.now();
       if (now - this.#lastLog >= LOG_EVERY_MS) {
         this.#lastLog = now;
@@ -161,4 +171,23 @@ export class Relay {
       return "unreachable";
     }
   }
+}
+
+const STATUS_EVENT: Partial<Record<Character["status"], AgentEvent["kind"]>> = { working: "tool", waiting: "waiting", idle: "idle", sleeping: "idle" };
+
+/**
+ * Every character of `state` as events that rebuild it on the lab: a start, then its status, stamped with the time of
+ * its last real event, so the lab's sleep and leave timers stay right and a lab that already knew it changes nothing.
+ */
+export function snapshot(state: OfficeState | undefined): AgentEvent[] {
+  return Object.values(state?.characters ?? {}).flatMap((c): AgentEvent[] => {
+    const kind = STATUS_EVENT[c.status];
+    if (!kind) return [];
+    const base = { source: c.source, profile: c.profile, session: c.session, parent: c.parent, ts: new Date(c.lastEventAt).toISOString(), transport: "api" as const };
+    const start: AgentEvent = { ...base, kind: "start", agent: c.agent, name: c.name, model: c.model, cwd: c.cwd };
+    const now: AgentEvent = kind === "tool" ? { ...base, kind, tool: c.tool, detail: c.detail } : { ...base, kind };
+    const out = [start, now];
+    if (c.tokens) out.push({ ...base, kind: "usage", tokens: c.tokens });
+    return out.map((e) => Object.fromEntries(Object.entries(e).filter(([, v]) => v !== undefined)) as AgentEvent);
+  });
 }

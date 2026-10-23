@@ -252,7 +252,7 @@ export async function startServer(opts: Options): Promise<Running> {
   // while anyone is in, it holds, so nobody changes face and a full room still shows each character once
   const dealer = opts.dealer ?? (() => Math.floor(Math.random() * 1_000_000));
   let deal = dealer();
-  const relay = opts.relay ? new Relay(opts.relay) : undefined;
+  const relay = opts.relay ? new Relay(opts.relay, () => state) : undefined;
   const relayTimer = relay ? setInterval(() => void relay.flush(), opts.relay?.batchMs ?? 250) : undefined;
   relayTimer?.unref();
   const apply = (events: AgentEvent[]) => {
