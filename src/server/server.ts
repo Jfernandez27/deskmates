@@ -71,6 +71,8 @@ export type Options = {
   procLister?: ProcLister;
   /** how often sessions of those tools without a process are looked up again (ms) */
   procScanMs?: number;
+  /** how often every open page gets a ping, so it can tell a dead connection from a quiet office; default 20 s */
+  heartbeatMs?: number;
   /** where each day's history is kept (YYYY-MM-DD.json); without it, history lives in memory only */
   historyDir?: string;
   historySaveMs?: number;
@@ -404,6 +406,9 @@ export async function startServer(opts: Options): Promise<Running> {
     : undefined;
   watcher?.start();
 
+  const heartbeat = setInterval(() => { for (const s of sockets.keys()) s.send('{"type":"ping"}'); }, opts.heartbeatMs ?? 20_000);
+  heartbeat.unref();
+
   const timer = setInterval(() => {
     const next = tick(state, Date.now());
     if (next !== state) {
@@ -420,7 +425,7 @@ export async function startServer(opts: Options): Promise<Running> {
   try {
     await new Promise<void>((ok, fail) => { server.once("error", fail); server.listen(opts.port ?? DEFAULT_PORT, host, () => ok()); });
   } catch (e) {
-    clearInterval(timer); clearInterval(procTimer); clearInterval(relayTimer);
+    clearInterval(timer); clearInterval(heartbeat); clearInterval(procTimer); clearInterval(relayTimer);
     watcher?.stop();
     throw e;
   }
@@ -429,7 +434,7 @@ export async function startServer(opts: Options): Promise<Running> {
     port: typeof addr === "object" && addr ? addr.port : opts.port ?? DEFAULT_PORT,
     state: () => state,
     close: async () => {
-      clearInterval(timer); clearInterval(procTimer); clearInterval(relayTimer);
+      clearInterval(timer); clearInterval(heartbeat); clearInterval(procTimer); clearInterval(relayTimer);
       watcher?.stop();
       // the shared office learns these sessions are gone; best effort, at most a second
       await relay?.close(state).catch(() => {});
