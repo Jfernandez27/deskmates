@@ -30,7 +30,12 @@ export const gemini: TranscriptAdapter = {
     const out: AgentEvent[] = [];
     const calls = Array.isArray(d.toolCalls) ? d.toolCalls : [];
     const last = calls.at(-1);
-    if (last) out.push({ ...base("tool"), tool: String(last.name), detail: detailOf(String(last.name), last.args) });
+    // a message is written again as its calls progress (executing → success): a call already shown is not a new tool
+    const callKey = last && `${d.id}/${last.id ?? calls.length}`;
+    if (last && callKey !== ctx.state.lastCall) {
+      ctx.state.lastCall = callKey;
+      out.push({ ...base("tool"), tool: String(last.name), detail: detailOf(String(last.name), last.args) });
+    }
     if (d.tokens && typeof d.id === "string") {
       tokens[d.id] = { input: num(d.tokens.input), output: num(d.tokens.output), cached: num(d.tokens.cached) };
       const sum = Object.values(tokens).reduce((a, t) => ({ input: a.input + t.input - t.cached, output: a.output + t.output, cacheRead: a.cacheRead + t.cached }), { input: 0, output: 0, cacheRead: 0 });
