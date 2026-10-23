@@ -1,9 +1,14 @@
 import { open, stat } from "node:fs/promises";
 
-/** Reads a growing text file line by line, holding back an incomplete last line. Restarts if the file shrinks. */
+/** At most this much is read per call; a bigger backlog is read over the next calls. */
+const MAX_READ = 16 * 1024 * 1024;
+
+/** Reads a growing text file line by line, holding back an incomplete last line. Restarts if the file shrinks or is replaced. */
 export class LineTail {
   offset = 0;
-  private rest = "";
+  /** an incomplete last line, as bytes: a character split across two reads is decoded only once whole */
+  private rest = Buffer.alloc(0);
+  private ino?: number;
   readonly path: string;
   constructor(path: string, fromEnd = 0) { this.path = path; this.offset = fromEnd; }
 
@@ -12,20 +17,28 @@ export class LineTail {
    * A file it cannot stat, open or read (gone, root-owned) gives no lines and is tried again next call.
    */
   async read(): Promise<{ lines: string[]; reset: boolean }> {
-    let size: number;
-    try { size = (await stat(this.path)).size; } catch { return { lines: [], reset: false }; }
+    let size: number, ino: number;
+    try { ({ size, ino } = await stat(this.path)); } catch { return { lines: [], reset: false }; }
     let reset = false;
-    if (size < this.offset) { this.offset = 0; this.rest = ""; reset = true; }
+    // a file written anew under the same name (an atomic save) is another file, even when it is not shorter
+    if (size < this.offset || (this.ino !== undefined && ino !== this.ino)) { this.offset = 0; this.rest = Buffer.alloc(0); reset = true; }
+    this.ino = ino;
     if (size === this.offset) return { lines: [], reset };
     let fh;
     try { fh = await open(this.path, "r"); } catch { return { lines: [], reset }; }
     try {
-      const buf = Buffer.alloc(size - this.offset);
-      await fh.read(buf, 0, buf.length, this.offset);
-      this.offset = size;
-      const lines = (this.rest + buf.toString("utf8")).split("\n");
-      this.rest = lines.pop() ?? "";
-      return { lines: lines.filter((l) => l.trim()), reset };
+      const buf = Buffer.alloc(Math.min(size - this.offset, MAX_READ));
+      const { bytesRead } = await fh.read(buf, 0, buf.length, this.offset);
+      this.offset += bytesRead;
+      const data = Buffer.concat([this.rest, buf.subarray(0, bytesRead)]);
+      const lines: string[] = [];
+      let start = 0;
+      for (let nl = data.indexOf(10); nl >= 0; start = nl + 1, nl = data.indexOf(10, start)) {
+        const line = data.toString("utf8", start, nl);
+        if (line.trim()) lines.push(line);
+      }
+      this.rest = data.subarray(start);
+      return { lines, reset };
     } catch {
       return { lines: [], reset };
     } finally {

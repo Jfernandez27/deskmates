@@ -67,6 +67,8 @@ export class TranscriptWatcher {
         try { if (head) adapter.decode(JSON.parse(head), w.ctx); } catch { /* a bad header only means the session stays unnamed */ }
       }
     }
+    // most files are old and still: one stat each round, no second one in the tail
+    if (info.mtimeMs === w.ctx.mtime && info.size === w.tail.offset) return;
     w.ctx.mtime = info.mtimeMs;
     const { lines, reset } = await w.tail.read();
     if (reset) w.ctx.state = {};
