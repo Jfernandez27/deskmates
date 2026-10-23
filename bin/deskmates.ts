@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, accessSync, constants } from "node:fs";
+import { existsSync, accessSync, constants, readFileSync } from "node:fs";
 import { homedir, networkInterfaces } from "node:os";
 import { join, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
@@ -190,6 +190,10 @@ async function main() {
       process.exitCode = ok ? 0 : 1;
       return;
     }
+    case "--version": case "-v": case "version": {
+      console.log(JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")).version);
+      return;
+    }
     default:
       console.log(`deskmates — a pixel-art office for your AI coding agents
 
@@ -216,8 +220,10 @@ async function main() {
                                       --pcs spreads them over several PCs, as in a shared office
   deskmates mcp [--url http://host:47821] [--source NAME]
                                       stdio MCP server: any MCP client reports its agent to the office
-                                      (see docs/mcp.md)`);
-      if (cmd && cmd !== "help" && cmd !== "--help") process.exitCode = 2;
+                                      (see docs/mcp.md)
+  deskmates --version                 print the version
+  deskmates --help                    this help (also -h)`);
+      if (cmd && !["help", "--help", "-h"].includes(cmd)) process.exitCode = 2;
   }
 }
 main().catch((e) => { console.error(e instanceof Error ? e.message : e); process.exit(1); });
