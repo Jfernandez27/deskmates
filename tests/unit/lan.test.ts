@@ -42,7 +42,7 @@ test.skipIf(!lanIp)("with --lan, the network needs the token; the link sets a co
 
 test.skipIf(!lanIp)("with --lan, hooks still only come from this machine, and the websocket needs the token", async () => {
   const port = await boot(true);
-  const hook = (host: string) => fetch(`http://${host}:${port}/v1/hook/claude?token=${TOKEN}`, { method: "POST", body: JSON.stringify({ hook_event_name: "SessionStart", session_id: "s" }) });
+  const hook = (host: string) => fetch(`http://${host}:${port}/v1/hook/claude?token=${TOKEN}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ hook_event_name: "SessionStart", session_id: "s" }) });
   expect((await hook(lanIp!)).status).toBe(403);
   expect((await hook("127.0.0.1")).status).toBe(204);
   const closed = await new Promise<number>((ok) => { const ws = new WebSocket(`ws://${lanIp}:${port}/ws`); ws.on("close", (c) => ok(c)); ws.on("error", () => ok(-1)); });

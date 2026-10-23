@@ -22,6 +22,8 @@ import { Relay, type RelayOptions } from "./relay.ts";
 
 export const DEFAULT_PORT = 47821;
 const MAX_BODY = 64 * 1024;
+/** a PostToolUse hook carries the tool's whole output (a large Read); only this machine can post it */
+const MAX_HOOK_BODY = 8 * 1024 * 1024;
 const TYPES: Record<string, string> = {
   ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
   ".png": "image/png", ".json": "application/json", ".svg": "image/svg+xml", ".wav": "audio/wav", ".ico": "image/x-icon",
@@ -93,13 +95,13 @@ export function hookName(v: string | string[] | undefined): string | undefined {
 
 const isLoopback = (a?: string) => a === "127.0.0.1" || a === "::1" || a === "::ffff:127.0.0.1";
 
-function readBody(req: IncomingMessage): Promise<Buffer | "too-large"> {
+function readBody(req: IncomingMessage, max = MAX_BODY): Promise<Buffer | "too-large"> {
   return new Promise((ok, fail) => {
     const chunks: Buffer[] = [];
     let size = 0;
     req.on("data", (c: Buffer) => {
       size += c.length;
-      if (size > MAX_BODY) { req.removeAllListeners("data"); req.resume(); ok("too-large"); return; }
+      if (size > max) { req.removeAllListeners("data"); req.resume(); ok("too-large"); return; }
       chunks.push(c);
     });
     req.on("end", () => ok(Buffer.concat(chunks)));
@@ -295,7 +297,9 @@ export async function startServer(opts: Options): Promise<Running> {
       if (url === "/v1/hook/claude") {
         if (req.method !== "POST") { res.writeHead(405, { allow: "POST" }).end(); return; }
         if (!isLoopback(req.socket.remoteAddress)) { res.writeHead(403).end(); return; }
-        const body = await readBody(req);
+        // only JSON: a web page can post text/plain to 127.0.0.1 without asking, but application/json needs a preflight we never grant
+        if (!/^application\/json\b/i.test(req.headers["content-type"] ?? "")) { res.writeHead(415).end(); return; }
+        const body = await readBody(req, MAX_HOOK_BODY);
         if (body === "too-large") { res.writeHead(413).end(); return; }
         let payload: unknown;
         try { payload = JSON.parse(body.toString("utf8")); } catch { res.writeHead(400).end("invalid JSON"); return; }
