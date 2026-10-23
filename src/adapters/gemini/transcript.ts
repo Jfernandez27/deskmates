@@ -37,7 +37,7 @@ export const gemini: TranscriptAdapter = {
       out.push({ ...base("tool"), tool: String(last.name), detail: detailOf(String(last.name), last.args) });
     }
     if (d.tokens && typeof d.id === "string") {
-      tokens[d.id] = { input: num(d.tokens.input), output: num(d.tokens.output), cached: num(d.tokens.cached) };
+      tokens[d.id] = { input: num(d.tokens.input), output: num(d.tokens.output) + num(d.tokens.thoughts), cached: num(d.tokens.cached) };
       const sum = Object.values(tokens).reduce((a, t) => ({ input: a.input + t.input - t.cached, output: a.output + t.output, cacheRead: a.cacheRead + t.cached }), { input: 0, output: 0, cacheRead: 0 });
       out.push({ ...base("usage"), tokens: sum });
     }
