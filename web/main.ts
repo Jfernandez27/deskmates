@@ -402,7 +402,6 @@ function frame(ms: number) {
   const css = kiosk.state.on ? fitCss(canvas.width, canvas.height, availW, availH) : { w: canvas.width / dpr, h: canvas.height / dpr };
   canvas.style.width = `${css.w}px`;
   canvas.style.height = `${css.h}px`;
-  if (fixedT === undefined) requestAnimationFrame(frame);
 }
 // live pages redraw every frame; static ones (screenshots) redraw when the window or its pixel density changes.
 // A change of devicePixelRatio (zoom, a move to another screen) fires no resize everywhere, so it is watched itself.
@@ -426,4 +425,6 @@ if (demo) {
 } else {
   connect();
 }
-requestAnimationFrame(frame);
+/** the only animation loop: frame() itself never schedules one, so drawing on demand (tests, resize) adds none */
+function loop(ms: number) { frame(ms); if (fixedT === undefined) requestAnimationFrame(loop); }
+requestAnimationFrame(loop);
