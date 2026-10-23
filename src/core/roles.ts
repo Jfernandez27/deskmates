@@ -32,17 +32,23 @@ export function parseRoles(text: string): Role[] {
   });
 }
 
-/** Bundled roles, overridden role-by-role and extended by the user's file when it exists. */
-export function loadRoles(userFile?: string): Role[] {
-  const merged = new Map(parseRoles(readFileSync(BUNDLED, "utf8")).map((r) => [r.role, r]));
-  if (userFile && existsSync(userFile)) for (const r of parseRoles(readFileSync(userFile, "utf8"))) merged.set(r.role, r);
-  return [...merged.values()];
+/**
+ * The user's roles first, then the bundled ones they do not redefine, so a user role wins every name it matches.
+ * A user file that cannot be read or parsed is reported through `warn` and left out: the office starts anyway.
+ */
+export function loadRoles(userFile?: string, warn: (message: string) => void = console.error): Role[] {
+  let mine: Role[] = [];
+  if (userFile && existsSync(userFile)) {
+    try { mine = parseRoles(readFileSync(userFile, "utf8")); } catch (e) { warn(`${userFile}: ${(e as Error).message}; using the bundled roles`); }
+  }
+  const names = new Set(mine.map((r) => r.role));
+  return [...mine, ...parseRoles(readFileSync(BUNDLED, "utf8")).filter((r) => !names.has(r.role))];
 }
 
 export function roleFor(roles: Role[], agent: string | undefined): Outfit | undefined {
   if (!agent) return undefined;
   const bare = agent.includes(":") ? agent.slice(agent.lastIndexOf(":") + 1) : agent;
-  const r = roles.find((x) => x.match.includes(agent) || x.match.includes(bare));
+  const r = roles.find((x) => x.match.includes(agent)) ?? roles.find((x) => x.match.includes(bare));
   if (!r) return undefined;
   const out: Outfit = { role: r.role };
   if (r.color) out.color = r.color;

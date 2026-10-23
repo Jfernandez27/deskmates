@@ -77,3 +77,24 @@ test("every accessory a role may name has a sprite and an anchor", async () => {
     expect(anchors[a], `anchor for ${a}`).toBeDefined();
   }
 });
+
+test("a broken user roles.toml is reported and left out; the office still starts with the bundled roles", () => {
+  const dir = mkdtempSync(join(tmpdir(), "dm-roles-"));
+  const user = join(dir, "roles.toml");
+  writeFileSync(user, '[roles.designer]\nmatch = ["designer"\n');
+  const warnings: string[] = [];
+  const r = loadRoles(user, (m) => warnings.push(m));
+  expect(roleFor(r, "designer")?.accessory).toBe("beret");
+  expect(warnings).toHaveLength(1);
+  expect(warnings[0]).toContain(user);
+});
+
+test("a user role wins over a bundled one that matches the same name, and an exact plugin:agent match wins over a bare one", () => {
+  const dir = mkdtempSync(join(tmpdir(), "dm-roles-"));
+  const user = join(dir, "roles.toml");
+  writeFileSync(user, '[roles.scout]\nmatch = ["Explore"]\naccessory = "globe"\n[roles.id3a-designer]\nmatch = ["id3a:designer"]\naccessory = "book"\n');
+  const r = loadRoles(user);
+  expect(roleFor(r, "Explore")?.role).toBe("scout");
+  expect(roleFor(r, "id3a:designer")?.role).toBe("id3a-designer");
+  expect(roleFor(r, "other:designer")?.role).toBe("designer");
+});
