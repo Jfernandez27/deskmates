@@ -29,7 +29,14 @@ const cmd = args[0];
 const flag = (name: string) => { const i = args.indexOf(`--${name}`); return i >= 0 ? args[i + 1] : undefined; };
 const expand = (p: string) => resolve(p.replace(/^~(?=$|\/)/, homedir()));
 const profileArg = () => expand(flag("profile") ?? process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), ".claude"));
-const port = Number(flag("port") ?? process.env.DESKMATES_PORT ?? DEFAULT_PORT);
+/** --port, else DESKMATES_PORT (an empty one is unset), else 47821; anything but 1-65535 is refused rather than turned into a random port */
+const port = (() => {
+  const raw = flag("port") ?? (process.env.DESKMATES_PORT || undefined);
+  if (raw === undefined) return DEFAULT_PORT;
+  const n = Number(raw);
+  if (!Number.isInteger(n) || n < 1 || n > 65535) { console.error(`deskmates: port must be a number from 1 to 65535, got "${raw}"`); process.exit(2); }
+  return n;
+})();
 
 const knownProfiles = () => findProfiles(homedir(), [process.env.CLAUDE_CONFIG_DIR, flag("profile")].map((p) => p && expand(p)));
 /** --all: every profile on this machine; otherwise the one named, $CLAUDE_CONFIG_DIR or ~/.claude */
