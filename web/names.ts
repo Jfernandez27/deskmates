@@ -8,7 +8,7 @@ export const NAMES: Record<Bank, readonly string[]> = {
   f: ["Sofía", "Camila", "Valeria", "Lucía", "Martina", "Renata", "Isabel", "Paula", "Elena", "Inés",
     "Julia", "Clara", "Daniela", "Paz", "Ana", "Mika", "Lina", "Nora", "Rosa", "Ada"],
   m: ["Mateo", "Diego", "Tomás", "Joaquín", "Bruno", "Lucas", "Andrés", "Pablo", "Nico", "Felipe",
-    "Hugo", "Iván", "Rafa", "Simón", "Omar", "Theo", "Max", "Sol", "Gus", "Leo"],
+    "Hugo", "Iván", "Rafa", "Simón", "Omar", "Theo", "Max", "Emilio", "Gus", "Leo"],
 };
 
 /**
