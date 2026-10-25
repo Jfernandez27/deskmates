@@ -15,6 +15,7 @@ Every image bundled with deskmates, where it comes from and its licence.
 | `assets/seasons/` (Halloween, Fiestas Patrias, Christmas and the four seasons of the year) | deskmates | drawn for this project (`scripts/draw-theme-art.py`) | MIT — see `LICENSE` |
 | `assets/pets/` (Pascal, Biscuit, Nova and Pip) | deskmates, derived from the Pixel Agents pets (Claudio and Gitcat) | `scripts/draw-pets.py` recolours the Pixel Agents pet sheets and edits every frame: white muzzles, bibs and socks, calico patches, a docked tail and shorter legs, long ears and a round tail | MIT — see `LICENSE` and `assets/pixel-agents/LICENSE` |
 | `assets/characters/` (the eight deskmates characters) | deskmates, derived from the Pixel Agents characters | `scripts/draw-characters.py` recolours the Pixel Agents sheets (skin, hair, clothes) and adds glasses and beards | MIT — see `LICENSE` and `assets/pixel-agents/LICENSE` |
+| `web/favicon.png` (the browser tab icon) | deskmates, derived from the Pixel Agents characters | `scripts/draw-characters.py` crops the head of the first deskmates character | MIT — see `LICENSE` and `assets/pixel-agents/LICENSE` |
 
 The Pixel Agents characters are based on the [Metro City character pack](https://jik-a-4.itch.io/metrocity-free-topdown-character-pack) by JIK-A-4, released under CC0.
 

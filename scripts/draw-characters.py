@@ -213,6 +213,13 @@ def write_tops(sheets):
     print("assets/characters/tops.json")
 
 
+def write_favicon(sheet):
+    """web/favicon.png: the head of the first character, facing the viewer, doubled to 32x32 with no smoothing."""
+    head = sheet.crop((0, 0, 16, 16)).resize((32, 32), Image.NEAREST)
+    head.save(ROOT.parent / "web" / "favicon.png")
+    print("web/favicon.png")
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     sheets = []
@@ -222,6 +229,7 @@ def main():
         sheets.append((spec, im))
         print(f"assets/characters/char_{i}.png from Pixel Agents char_{spec['base']}")
     write_tops(sheets)
+    write_favicon(sheets[0][1])
 
 
 if __name__ == "__main__":
