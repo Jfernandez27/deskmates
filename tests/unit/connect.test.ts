@@ -75,6 +75,17 @@ test("status reports a stale hook path", () => {
   expect(status(p.dir, "/new/path/deskmates-hook.sh")).toMatchObject({ connected: true, stale: true });
 });
 
+test("status names the events a profile connected by an older version does not send, and connect adds them", () => {
+  const p = profile();
+  connect(p.dir, HOOK);
+  const data = JSON.parse(readFileSync(p.file, "utf8"));
+  delete data.hooks.StopFailure;
+  writeFileSync(p.file, JSON.stringify(data, null, 2));
+  expect(status(p.dir, HOOK)).toMatchObject({ connected: true, stale: false, missing: ["StopFailure"] });
+  connect(p.dir, HOOK);
+  expect(status(p.dir, HOOK)).toMatchObject({ entries: HOOK_EVENTS.length, missing: [] });
+});
+
 test("entries that lost their mark (Claude Code rewrote settings.json) are still ours: no duplicates, and disconnect removes them", () => {
   const unmarked = { matcher: ".*", hooks: [{ type: "command", command: "'/old/node/lib/node_modules/deskmates/bin/deskmates-hook.sh'" }] };
   const hooks: Record<string, unknown[]> = { ...existing.hooks };

@@ -65,6 +65,12 @@ test("only notifications that ask for an answer mean waiting; an agent idle at i
     expect(fromHook({ ...base, notification_type: type }, NOW)).toEqual([]);
 });
 
+test("a turn that ends on an API error leaves the agent done, like Stop", () => {
+  const p = { session_id: "s", transcript_path: "/h/.claude/projects/p/s.jsonl", cwd: "/p", hook_event_name: "StopFailure",
+    error: "rate_limit", error_details: "429 Too Many Requests", last_assistant_message: "API Error: Rate limit reached" };
+  expect(fromHook(p, NOW)).toEqual([{ source: "claude", profile: "claude", session: "s", cwd: "/p", kind: "idle", ts: NOW, transport: "hook" }]);
+});
+
 test("never leaks prompts or tool contents, and details are short", () => {
   const secret = "SECRET-" + "x".repeat(300);
   const base = { session_id: "s", transcript_path: "/h/.claude/projects/p/s.jsonl", cwd: "/p" };

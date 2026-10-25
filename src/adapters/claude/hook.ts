@@ -21,6 +21,7 @@ const KIND: Record<string, EventKind> = {
   PermissionRequest: "waiting",
   Notification: "waiting",
   Stop: "idle",
+  StopFailure: "idle",
   SessionEnd: "end",
   SubagentStart: "start",
   SubagentStop: "end",

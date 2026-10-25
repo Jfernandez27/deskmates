@@ -4,7 +4,7 @@ import { join } from "node:path";
 /** Claude Code hook events deskmates listens to. */
 export const HOOK_EVENTS = [
   "SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse", "PermissionRequest",
-  "Notification", "Stop", "SessionEnd", "SubagentStart", "SubagentStop",
+  "Notification", "Stop", "StopFailure", "SessionEnd", "SubagentStart", "SubagentStop",
 ] as const;
 
 const MARK = "_deskmates";
@@ -87,11 +87,14 @@ export function disconnect(profileDir: string): boolean {
 
 export function status(profileDir: string, hookPath: string) {
   const file = settingsFile(profileDir);
-  if (!existsSync(file)) return { connected: false, entries: 0, stale: false };
+  if (!existsSync(file)) return { connected: false, entries: 0, stale: false, missing: [] as string[] };
   const { data } = read(file);
-  const ours = Object.values(data.hooks ?? {}).flat().filter(isOurs);
+  const hooks = data.hooks ?? {};
+  const ours = Object.values(hooks).flat().filter(isOurs);
   const stale = ours.some((h) => !samePath(unquote(h.hooks?.[0]?.command ?? ""), hookPath));
-  return { connected: ours.length > 0, entries: ours.length, stale };
+  // events added in a later version, which a profile connected before it does not send yet
+  const missing: string[] = ours.length ? HOOK_EVENTS.filter((ev) => !(hooks[ev] ?? []).some(isOurs)) : [];
+  return { connected: ours.length > 0, entries: ours.length, stale, missing };
 }
 
 const unquote = (cmd: string) => (/^'.*'$/s.test(cmd) ? cmd.slice(1, -1).replace(/'\\''/g, "'") : cmd);

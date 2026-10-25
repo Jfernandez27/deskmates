@@ -192,7 +192,8 @@ async function main() {
       for (const p of knownProfiles()) {
         let s;
         try { s = status(p, HOOK_COPY); } catch (e) { line(false, `${p}: ${(e as Error).message}`); continue; }
-        line(s.connected && !s.stale, `${p}: ${s.connected ? `${s.entries} hooks${s.stale ? ", pointing to an old path — run connect again" : ""}` : "not connected"}`);
+        const why = [s.stale && "pointing to an old path", s.missing.length && `missing ${s.missing.join(", ")}`].filter(Boolean).join(", ");
+        line(s.connected && !why, `${p}: ${s.connected ? `${s.entries} hooks${why ? `, ${why} — run connect again` : ""}` : "not connected"}`);
       }
       process.exitCode = ok ? 0 : 1;
       return;

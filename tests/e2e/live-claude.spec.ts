@@ -16,7 +16,7 @@ test.setTimeout(180_000);
 test("a real Claude session arrives, works, idles and leaves", async ({ page }) => {
   const hook = new URL("../../bin/deskmates-hook.sh", import.meta.url).pathname;
   const dir = mkdtempSync(join(tmpdir(), "dm-e2e-"));
-  const events = ["SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse", "PermissionRequest", "Notification", "Stop", "SessionEnd", "SubagentStart", "SubagentStop"];
+  const events = ["SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse", "PermissionRequest", "Notification", "Stop", "StopFailure", "SessionEnd", "SubagentStart", "SubagentStop"];
   const settings = join(dir, "settings.json");
   writeFileSync(settings, JSON.stringify({ hooks: Object.fromEntries(events.map((e) => [e, [{ matcher: ".*", hooks: [{ type: "command", command: `'${hook}'` }] }]])) }));
 
