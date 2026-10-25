@@ -57,6 +57,12 @@ test("only notifications that ask for an answer mean waiting; an agent idle at i
   expect(fromHook({ ...base, notification_type: "elicitation_dialog" }, NOW)[0].kind).toBe("waiting");
   expect(fromHook({ ...base, notification_type: "idle_prompt", message: "Claude is waiting for your input" }, NOW)).toEqual([]);
   expect(fromHook({ ...base, notification_type: "auth_success" }, NOW)).toEqual([]);
+  for (const type of ["elicitation_url_dialog", "agent_needs_input", "quota_auto_resume_stale"])
+    expect(fromHook({ ...base, notification_type: type }, NOW)[0].kind).toBe("waiting");
+  // types that ask nothing, and any a later Claude Code adds, never leave a ? behind
+  for (const type of ["elicitation_complete", "elicitation_response", "agent_completed", "quota_auto_resume_fired",
+    "quota_auto_resume_disabled", "plugin_notification", "something_new"])
+    expect(fromHook({ ...base, notification_type: type }, NOW)).toEqual([]);
 });
 
 test("never leaks prompts or tool contents, and details are short", () => {
