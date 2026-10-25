@@ -37,6 +37,7 @@ Limits:
 - Most have no explicit end: their characters fall asleep after 10 quiet minutes and leave after 30.
 - Cursor lines have no timestamps; the file time is used.
 - Formats can change with a tool update. A line deskmates cannot read is skipped; `deskmates doctor` shows which tools it found.
+- Since 2026-06-18 Gemini CLI serves only API keys and Standard or Enterprise licences; personal Google accounts moved to Antigravity CLI, which deskmates does not follow yet.
 
 Turn session files off with `deskmates serve --no-transcripts`.
 

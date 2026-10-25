@@ -117,9 +117,11 @@ The **History** button at the top right opens today's history: who worked, for h
 | Codex CLI and Codex desktop | `~/.codex/sessions/**/rollout-*.jsonl` (`$CODEX_HOME`) | tools, tokens, idle per task |
 | GitHub Copilot CLI | `~/.copilot/session-state/*/events.jsonl` (`$COPILOT_HOME`) | tools, tokens at the end, leaves on shutdown |
 | Cursor agent (editor and CLI) | `~/.cursor/projects/*/agent-transcripts/*/*.jsonl` | lines have no timestamps; the file time is used |
-| Gemini CLI | `~/.gemini/tmp/*/chats/session-*.jsonl` (`$GEMINI_CLI_HOME`) | tools and tokens per message |
+| Gemini CLI | `~/.gemini/tmp/*/chats/session-*.jsonl` (`$GEMINI_CLI_HOME`) | tools and tokens per message; see below |
 
 These tools write no explicit "waiting for permission" or "session ended" line in every case, so their characters fall asleep after 10 quiet minutes (one waiting for you keeps its **?**) and leave after 30. Sessions that were already quiet when deskmates started are ignored. Turn this off with `serve --no-transcripts`. `deskmates doctor` lists which ones it found.
+
+Since 2026-06-18 Gemini CLI serves only API keys and Standard or Enterprise licences; personal Google accounts moved to Antigravity CLI, which deskmates does not follow yet.
 
 For anything else, add the [MCP server](docs/mcp.md) to its MCP settings or post events to the [ingest API](docs/ingest-api.md).
 
