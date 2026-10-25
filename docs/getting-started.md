@@ -119,14 +119,18 @@ What everything on the page means, and the everyday tasks, are in [usage.md](usa
 
 ## Demo mode
 
-Shows what deskmates looks like without spending tokens: simulated agents are posted to the running office through the ingest API.
+Shows what deskmates looks like without spending tokens: simulated agents are posted to the office through the ingest API.
+
+With no office running on this machine, `deskmates demo` (or `npx deskmates demo`, with nothing installed) opens one with the simulated agents alone, at `http://127.0.0.1:47821`, and runs until Ctrl+C. It follows no session files and keeps no history.
+
+To add the demo to the office you already run, beside your real agents:
 
 1. Start the office in one terminal: `deskmates serve` (add `--lan` to watch from another device). From a clone without `npm link`, run `npm start`.
 2. Open `http://127.0.0.1:47821`.
 3. In another terminal, run the demo. From a clone without `npm link`, use `node bin/deskmates.ts demo …` instead of `deskmates demo …`.
 4. Stop it with Ctrl+C, or let `--minutes` run out.
 
-The demo waits up to a minute if the office is not up yet. It reads the token from `~/.config/deskmates/token` (created on first use); to post to another machine, copy that machine's token there first.
+With `--url`, the demo waits up to a minute if that office is not up yet. It reads the token from `~/.config/deskmates/token` (created on first use); to post to another machine, copy that machine's token there first.
 
 ```bash
 deskmates demo                                   # 6 agents, 1 meeting, 1 waiting, 1 subagent, 1 on breaks, 10 minutes

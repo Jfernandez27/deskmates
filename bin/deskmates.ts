@@ -41,11 +41,14 @@ const port = (() => {
 const knownProfiles = () => findProfiles(homedir(), [process.env.CLAUDE_CONFIG_DIR, flag("profile")].map((p) => p && expand(p)));
 /** --all: every profile on this machine; otherwise the one named, $CLAUDE_CONFIG_DIR or ~/.claude */
 const targetProfiles = () => (args.includes("--all") ? knownProfiles() : [profileArg()]);
+const requireWeb = () => {
+  if (!existsSync(join(WEB, "index.html"))) { console.error(`The web app is not built. Run: npm run build:web (in ${ROOT})`); process.exit(1); }
+};
 
 async function main() {
   switch (cmd) {
     case "serve": {
-      if (!existsSync(join(WEB, "index.html"))) { console.error(`The web app is not built. Run: npm run build:web (in ${ROOT})`); process.exit(1); }
+      requireWeb();
       const shared = args.includes("--shared");
       const transcripts = args.includes("--no-transcripts") || shared ? [] : TRANSCRIPT_ADAPTERS;
       const relayUrl = (flag("relay") ?? process.env.DESKMATES_RELAY)?.replace(/\/$/, "");
@@ -90,13 +93,21 @@ async function main() {
     }
     case "demo": {
       const num = (k: string) => (flag(k) === undefined ? undefined : Number(flag(k)));
+      const token = loadOrCreateToken();
+      // no office running on this machine: open one with the demo alone in it, so one command shows the office
+      let own = false;
+      if (flag("url") === undefined && !(await fetch(`http://127.0.0.1:${port}/healthz`, { signal: AbortSignal.timeout(1000) }).then((r) => r.ok, () => false))) {
+        requireWeb();
+        await startServer({ port, webDir: WEB, token, transcripts: [] });
+        own = true;
+        console.log(`deskmates: http://127.0.0.1:${port} — no office was running, so the demo opened one with simulated agents only; Ctrl+C closes it`);
+      }
       const o = normalize({
         agents: num("agents"), meetings: num("meetings"), waiting: num("waiting"), subagents: num("subagents"), breaks: num("breaks"), pcs: num("pcs"),
         tools: flag("tools") === undefined ? DEFAULTS.tools : flag("tools")!.split(",").filter(Boolean),
-        seconds: num("minutes") === undefined ? DEFAULTS.seconds : num("minutes")! * 60,
+        seconds: num("minutes") === undefined ? (own ? 0 : DEFAULTS.seconds) : num("minutes")! * 60,
       } as never);
       const url = `${(flag("url") ?? `http://127.0.0.1:${port}`).replace(/\/$/, "")}/v1/events`;
-      const token = loadOrCreateToken();
       const c = cast(o);
       const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
       const send = async (all: AgentEvent[]) => {
@@ -225,6 +236,8 @@ async function main() {
   deskmates demo [--agents 6] [--meetings 1] [--waiting 1] [--subagents 1] [--breaks 1]
                  [--tools codex,copilot,gemini] [--minutes 10] [--url http://host:47821] [--pcs 4]
                                       fill the office with simulated agents (0 minutes = until Ctrl+C);
+                                      with no office running here, opens its own with the demo alone
+                                      and runs until Ctrl+C;
                                       --pcs spreads them over several PCs, as in a shared office
   deskmates mcp [--url http://host:47821] [--source NAME]
                                       stdio MCP server: any MCP client reports its agent to the office

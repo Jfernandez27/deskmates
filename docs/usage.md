@@ -112,7 +112,7 @@ Start `deskmates serve --lan`, scan the QR, press the kiosk button. deskmates do
 ## Show it to someone
 
 ```bash
-deskmates demo                       # 10 minutes of simulated agents, meetings, a waiting agent, a subagent
+deskmates demo                       # simulated agents, meetings, a waiting agent, a subagent: 10 minutes in your office, or an office of their own until Ctrl+C
 deskmates demo --agents 8 --meetings 0 --waiting 0 --subagents 0 --breaks 0   # one full room: every character once
 ```
 

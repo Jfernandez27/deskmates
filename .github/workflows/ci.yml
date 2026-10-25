@@ -67,6 +67,11 @@ jobs:
           deskmates doctor --port 47999 > doctor.txt || true
           cat doctor.txt
           grep -q "service up on port" doctor.txt || { echo "doctor did not find the service"; exit 1; }
+          # with no office on its port, the demo opens its own: what `npx deskmates demo` does
+          deskmates demo --port 47998 &
+          for i in $(seq 1 50); do curl -sf http://127.0.0.1:47998/healthz | grep -q '"characters":[1-9]' && break; sleep 0.2; done
+          curl -sf http://127.0.0.1:47998/healthz | grep -q '"characters":[1-9]' || { echo "the demo did not open an office"; exit 1; }
+          curl -sf http://127.0.0.1:47998/ | grep -q '<canvas'
 
   vscode:
     runs-on: ubuntu-latest
