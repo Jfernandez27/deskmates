@@ -4,18 +4,25 @@ A pixel-art office where your AI coding agents work at their desks.
 
 Every AI coding agent on your machine becomes a character: Claude Code, Codex (CLI and desktop app), GitHub Copilot CLI, Cursor and Gemini CLI, plus anything that posts to its API. It walks in, sits down, types while it edits, reads while it searches, stands up with a yellow **?** when it needs your permission, shows a green check when it is done, falls asleep when it goes quiet, and walks out when the session ends. Subagents sit next to the agent that launched them. Named agents wear their role: a beret for the designer, a headset for the community manager.
 
-![deskmates office](tests/e2e/shot.spec.ts-snapshots/office-linux.png)
+![deskmates: agents typing, reading, waiting with a ? and done with a check](docs/office.gif)
+
+## Try it
+
+```bash
+npx deskmates demo             # opens http://127.0.0.1:47821 with simulated agents; Ctrl+C closes it
+```
+
+Nothing to install or configure, and no tokens spent: you need Node 22.18 or later. `demo --agents 12 --meetings 2` and more options in [Getting started](docs/getting-started.md#demo-mode).
 
 ## Quick start
 
 ```bash
 npm install -g deskmates
 deskmates serve                # the office at http://127.0.0.1:47821
-deskmates demo                 # in another terminal: simulated agents, meetings, a waiting agent, a subagent
-deskmates connect              # when you are ready: your Claude Code sessions walk in
+deskmates connect              # your Claude Code sessions walk in
 ```
 
-`demo --agents 12 --meetings 2 --minutes 0` and more options in [Getting started](docs/getting-started.md#demo-mode). Codex, Copilot CLI, Cursor and Gemini CLI need no setup.
+Codex, Copilot CLI, Cursor and Gemini CLI need no setup.
 
 ## What you see
 
